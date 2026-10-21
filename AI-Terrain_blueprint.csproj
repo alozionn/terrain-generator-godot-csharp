@@ -7,6 +7,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="tests/**;.scratch/**" />
-    <Compile Remove="dev/**" Condition="'$(Ship)'=='true'" />
+    <!-- Ship builds drop dev tools, which include the Terrain3D comparison bridge and the wrapper its bindings need -->
+    <Compile Remove="dev/**;addons/terrain_3d/csharp/**" Condition="'$(Ship)'=='true'" />
   </ItemGroup>
 </Project>

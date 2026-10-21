@@ -38,7 +38,8 @@ public static class FoliageStage
                 var allowed = sp.Bands.Count == 0 ? null : sp.Bands.Where(bandIndex.ContainsKey).Select(b => (byte)bandIndex[b]).ToHashSet();
                 float cosMax = MathF.Cos(sp.MaxSlope * MathF.PI / 180f);
                 float p = Math.Min(1f, sp.Density / 100f * sp.Spacing * sp.Spacing);
-                if (!result.ByMesh.TryGetValue(sp.Mesh, out var list)) result.ByMesh[sp.Mesh] = list = new List<FoliageInstance>();
+                var variants = sp.Meshes.Count > 0 ? sp.Meshes : new List<string> { sp.Mesh };
+                var lists = variants.Select(m => result.ByMesh.TryGetValue(m, out var l) ? l : result.ByMesh[m] = new List<FoliageInstance>()).ToArray();
 
                 int n = (int)MathF.Ceiling(w.Size / sp.Spacing);
                 for (int gz = 0; gz < n; gz++)
@@ -72,7 +73,7 @@ public static class FoliageStage
                             scale *= sp.PlayableScale;
                         }
                         float tilt = sp.Tilt * MathF.PI / 180f;
-                        list.Add(new FoliageInstance(x, y, z,
+                        lists[(int)(Seeds.Mix(h + 10) % (uint)lists.Length)].Add(new FoliageInstance(x, y, z,
                             Unit(Seeds.Mix(h + 5)) * MathF.Tau,
                             (Unit(Seeds.Mix(h + 6)) * 2 - 1) * tilt, (Unit(Seeds.Mix(h + 7)) * 2 - 1) * tilt,
                             scale,

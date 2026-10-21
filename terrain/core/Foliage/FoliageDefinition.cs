@@ -20,6 +20,8 @@ public sealed class SpeciesDefinition
     public string Id { get; set; } = "";
     /// <summary>Mesh id from data/foliage/meshes.json.</summary>
     public string Mesh { get; set; } = "";
+    /// <summary>Several mesh ids to pick from per instance (e.g. tree variants); used instead of <see cref="Mesh"/> when set.</summary>
+    public List<string> Meshes { get; set; } = new();
     /// <summary>Expected instances per 100 m² where every rule passes.</summary>
     public float Density { get; set; } = 1f;
     /// <summary>Minimum distance between two instances of this species, metres (also the jitter grid size).</summary>
@@ -82,7 +84,15 @@ public sealed class FoliageMeshDefinition
     public float BladeWidth { get; set; } = 0.05f;
     /// <summary>Clump radius in metres.</summary>
     public float Radius { get; set; } = 0.3f;
-    /// <summary>Distance where the clump drops to a third of its blades (wider); at 3x this, a sixth.</summary>
+    /// <summary>Distance where blades start dropping out of a clump (x0.4); for authored multi-LOD scenes, where LOD0 ends.</summary>
     public float LodDistance { get; set; } = 25f;
     public bool CastShadows { get; set; } = true;
+    /// <summary>Authored scenes: metres of sway at the top of the model; 0 keeps the imported materials as they are.</summary>
+    public float Wind { get; set; }
+    /// <summary>Authored scenes: how much leaf normals bend outward from the canopy (soft, painterly shading), 0..1.</summary>
+    public float LeafNormals { get; set; } = 0.6f;
+    /// <summary>Authored scenes: thin instances out with camera distance like the grass does (ground cover).</summary>
+    public bool Fade { get; set; }
+    /// <summary>Authored scenes: ["#root", "#tip"] recolours leaf and grass surfaces by height, keeping only the texture's light and dark.</summary>
+    public string[] Recolor { get; set; } = System.Array.Empty<string>();
 }

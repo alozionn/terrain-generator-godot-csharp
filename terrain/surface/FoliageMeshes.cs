@@ -8,18 +8,27 @@ using Terrain.Core.Level;
 namespace Terrain.Surface;
 
 /// <summary>
-/// Builds a scene for each foliage mesh: a res:// scene as authored, or a procedural one for "procedural:*".
-/// Terrain3D reads the MeshInstance3D children of a scene as LOD levels, so multi-part stand-ins are one mesh with a
-/// surface per part, and grass clumps get a dense LOD0 and a sparse LOD1.
+/// The LOD meshes for each foliage mesh: the MeshInstance3D meshes of a res:// scene in order, or generated ones for
+/// "procedural:*". Multi-part stand-ins are one surface coloured per vertex; grass clumps get three LODs.
 /// </summary>
 internal static class FoliageMeshes
 {
     static readonly Color Bark = new(0.42f, 0.29f, 0.2f);
     static Shader _grassShader;
+    static Shader _foliageShader;
 
-    public static PackedScene Scene(FoliageMeshDefinition def)
+    /// <summary>Distance where each LOD stops drawing: LOD i ends at LodDistance x 3^i, the last at Range. Grass clumps have a single LOD.</summary>
+    public static float[] LodEnds(FoliageMeshDefinition def, int count)
     {
-        if (!def.Scene.StartsWith("procedural:")) return GD.Load<PackedScene>(def.Scene);
+        var ends = new float[count];
+        for (int i = 0; i < count; i++)
+            ends[i] = i == count - 1 ? def.Range : MathF.Min(def.Range, def.LodDistance * MathF.Pow(3, i));
+        return ends;
+    }
+
+    public static List<Mesh> Lods(FoliageMeshDefinition def)
+    {
+        if (!def.Scene.StartsWith("procedural:")) return SceneMeshes(def);
 
         var color = ToColor(def.Color);
         var lods = new List<Mesh>();
@@ -29,9 +38,9 @@ internal static class FoliageMeshes
             case "flowers":
                 bool flowers = def.Scene.EndsWith("flowers");
                 var material = GrassMaterial(def, flowers);
+                // one mesh only: the shader thins blades and clumps by each clump's own distance, a smooth circle
+                // around the camera; swapping meshes per chunk showed as squares of different density
                 lods.Add(Clump(def, def.Blades, 1f, flowers, material));
-                lods.Add(Clump(def, Math.Max(3, def.Blades / 3), 1.8f, flowers, material));
-                lods.Add(Clump(def, Math.Max(2, def.Blades / 6), 2.6f, flowers, material));
                 break;
             case "tree_round":
                 lods.Add(Parts(
@@ -57,17 +66,72 @@ internal static class FoliageMeshes
                 break;
         }
 
-        var root = new Node3D { Name = def.Id };
-        for (int i = 0; i < lods.Count; i++)
+        return lods;
+    }
+
+    static List<Mesh> SceneMeshes(FoliageMeshDefinition def)
+    {
+        var lods = new List<Mesh>();
+        if (!ResourceLoader.Exists(def.Scene))
         {
-            var mi = new MeshInstance3D { Name = $"LOD{i}", Mesh = lods[i] };
-            root.AddChild(mi);
-            mi.Owner = root;
+            GD.PushError($"[Terrain] missing foliage scene {def.Scene}");
+            return lods;
         }
-        var scene = new PackedScene();
-        scene.Pack(root);
+        var root = GD.Load<PackedScene>(def.Scene).Instantiate();
+        void Collect(Node n)
+        {
+            if (n is MeshInstance3D { Mesh: { } m }) lods.Add(def.Wind > 0 || def.Fade ? WithWind(def, m) : m);
+            foreach (var c in n.GetChildren()) Collect(c);
+        }
+        Collect(root);
         root.Free();
-        return scene;
+        return lods;
+    }
+
+    /// <summary>
+    /// A copy of an imported mesh whose surfaces use foliage.gdshader, carrying over each material's texture, colour,
+    /// alpha cut-out and normal map. Leaf surfaces (cut-out, or named leaf, leaves, grass or flower) also flutter and get
+    /// soft canopy normals; bark only sways.
+    /// </summary>
+    static Mesh WithWind(FoliageMeshDefinition def, Mesh source)
+    {
+        _foliageShader ??= GD.Load<Shader>("res://terrain/surface/foliage.gdshader");
+        var mesh = (Mesh)source.Duplicate();
+        float height = MathF.Max(0.1f, source.GetAabb().End.Y);
+        for (int s = 0; s < mesh.GetSurfaceCount(); s++)
+        {
+            var src = source.SurfaceGetMaterial(s) as BaseMaterial3D;
+            string name = (src?.ResourceName ?? "").ToLowerInvariant();
+            bool cutout = src?.Transparency is BaseMaterial3D.TransparencyEnum.AlphaScissor or BaseMaterial3D.TransparencyEnum.Alpha;
+            bool leaf = cutout || name.Contains("lea") || name.Contains("grass") || name.Contains("flower");
+            var m = new ShaderMaterial { Shader = _foliageShader };
+            if (src != null)
+            {
+                m.SetShaderParameter("albedo_texture", src.AlbedoTexture);
+                m.SetShaderParameter("albedo_color", src.AlbedoColor);
+                m.SetShaderParameter("alpha_cut", cutout ? MathF.Max(0.05f, src.AlphaScissorThreshold) : 0f);
+                m.SetShaderParameter("use_normal_map", src.NormalEnabled && src.NormalTexture != null);
+                m.SetShaderParameter("normal_texture", src.NormalTexture);
+            }
+            m.SetShaderParameter("sway", def.Wind);
+            m.SetShaderParameter("model_height", height);
+            m.SetShaderParameter("flutter", leaf ? def.Wind * 0.12f : 0f);
+            m.SetShaderParameter("leaf_normals", leaf ? def.LeafNormals : 0f);
+            m.SetShaderParameter("canopy_height", height * 0.6f);
+            if (def.Recolor.Length == 2 && (name.Contains("lea") || name.Contains("grass")))
+            {
+                m.SetShaderParameter("recolor", true);
+                m.SetShaderParameter("root_color", ToColor(def.Recolor[0]));
+                m.SetShaderParameter("tip_color", ToColor(def.Recolor[1]));
+            }
+            if (def.Fade)
+            {
+                m.SetShaderParameter("fade_start", def.Range * 0.3f);
+                m.SetShaderParameter("fade_end", def.Range * 0.9f);
+            }
+            mesh.SurfaceSetMaterial(s, m);
+        }
+        return mesh;
     }
 
     /// <summary>

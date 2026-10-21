@@ -39,12 +39,11 @@ public partial class DemoRoot : Node3D
             _shotPath = args[i + 1];
             _shotClock = 0;
         }
-        // perf probes: --nossao, --noshadow, --nofog, --noterrain (hides the Terrain3D node), --nodebugmenu
+        // perf probes: --nossao, --noshadow, --nofog, --nodebugmenu
         var env = GetNode<WorldEnvironment>("WorldEnvironment").Environment;
         if (Array.IndexOf(args, "--nossao") >= 0) env.SsaoEnabled = false;
         if (Array.IndexOf(args, "--nofog") >= 0) env.FogEnabled = false;
         if (Array.IndexOf(args, "--noshadow") >= 0) GetNode<DirectionalLight3D>("Sun").ShadowEnabled = false;
-        if (Array.IndexOf(args, "--noterrain") >= 0 && _terrain.Renderer != null) _terrain.Renderer.Visible = false;
         if (Array.IndexOf(args, "--nodebugmenu") >= 0) GetNodeOrNull<CanvasLayer>("/root/DebugMenu")?.Hide();
         // --level path loads another level (e.g. a perf variant)
         int lv = Array.IndexOf(args, "--level");
@@ -59,16 +58,6 @@ public partial class DemoRoot : Node3D
             UpdateCamera();
         }
         if (Array.IndexOf(args, "--nogrid") >= 0) _terrain.ShowGrid = false;
-        // --t3d show_colormap (any bool property of the Terrain3D node, e.g. its debug views)
-        int t = Array.IndexOf(args, "--t3d");
-        if (t >= 0 && t + 1 < args.Length) _terrain.Renderer?.Set(args[t + 1], true);
-        // --t3dmat name=value sets a bool on the Terrain3D material
-        int tm = Array.IndexOf(args, "--t3dmat");
-        if (tm >= 0 && tm + 1 < args.Length && _terrain.Renderer?.Get("material").AsGodotObject() is { } mat)
-        {
-            var kv = args[tm + 1].Split('=');
-            mat.Set(kv[0], kv[1] == "true");
-        }
     }
 
     void OnGenerated()

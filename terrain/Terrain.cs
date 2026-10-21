@@ -7,7 +7,6 @@ using Terrain.Core.Generation;
 using Terrain.Core.Ground;
 using Terrain.Core.Level;
 using Terrain.Core.World;
-using Terrain.Integration;
 using Terrain.Surface;
 
 namespace Terrain;
@@ -15,7 +14,7 @@ namespace Terrain;
 /// <summary>
 /// The terrain node. Fully described by a <see cref="LevelDefinition"/>: <see cref="Apply"/> one, or
 /// <see cref="LoadLevel"/> from JSON. Layouts, palettes and the ground texture set are looked up under <see cref="DataRoot"/>.
-/// Generation runs in plain C#; Terrain3D renders the ground, this node adds the playable-cell grid.
+/// Generation runs in plain C#; this node draws the ground, foliage, the playable-cell grid and placed buildings.
 /// </summary>
 [GlobalClass]
 public partial class Terrain : Node3D
@@ -23,7 +22,9 @@ public partial class Terrain : Node3D
     [Export(PropertyHint.File, "*.json")] public string LevelPath { get; set; } = "res://data/levels/harbour_village.json";
     [Export(PropertyHint.Dir)] public string DataRoot { get; set; } = "res://data";
 
-    Terrain3DBridge _bridge;
+    GroundTextures _textures;
+    GroundRenderer _ground;
+    FoliageInstancer _foliage;
     ZoneGrid _grid;
     Placements _placements;
     bool _showGrid = true;
@@ -35,9 +36,6 @@ public partial class Terrain : Node3D
     public GroundMaps Ground { get; private set; }
     public FoliageResult Foliage { get; private set; }
     public IReadOnlyList<string> Issues { get; private set; } = Array.Empty<string>();
-
-    /// <summary>The Terrain3D node currently drawing the ground; replaced on every generate.</summary>
-    public Node3D Renderer => _bridge?.Node;
 
     public bool ShowGrid
     {
@@ -63,11 +61,12 @@ public partial class Terrain : Node3D
         var palette = Read<PaletteDefinition>($"{DataRoot}/palettes/{level.Palette}.json");
         if (layout == null || palette == null) return;
 
-        if (_bridge == null)
+        if (_textures == null)
         {
-            _bridge = new Terrain3DBridge(this);
-            _bridge.LoadTextures(Read<TextureSetDefinition>($"{DataRoot}/ground/textures.json") ?? new TextureSetDefinition());
-            _bridge.LoadMeshes(Read<FoliageMeshSetDefinition>($"{DataRoot}/foliage/meshes.json") ?? new FoliageMeshSetDefinition());
+            _textures = GroundTextures.Load(Read<TextureSetDefinition>($"{DataRoot}/ground/textures.json") ?? new TextureSetDefinition());
+            _ground = new GroundRenderer(this);
+            _foliage = new FoliageInstancer(this);
+            _foliage.LoadMeshes(Read<FoliageMeshSetDefinition>($"{DataRoot}/foliage/meshes.json") ?? new FoliageMeshSetDefinition());
         }
         var sets = new List<FoliageSetDefinition>();
         foreach (var id in level.Foliage)
@@ -80,13 +79,13 @@ public partial class Terrain : Node3D
         Palette = palette;
         World = result.World;
         Issues = result.Issues;
-        Ground = GroundMaps.Build(World, palette, _bridge.TextureIds, level.Seed);
+        Ground = GroundMaps.Build(World, palette, _textures.Ids, level.Seed);
         var occupied = World.CellMask(level.Placements.Select(p => (p.Cell[0], p.Cell[1], p.Cells[0], p.Cells[1])));
         Foliage = FoliageStage.Run(World, sets, level.Seed, occupied);
         var generated = Time.GetTicksMsec();
 
-        _bridge.Upload(World, Ground);
-        _bridge.Plant(Foliage);
+        _ground.Build(World, Ground, _textures);
+        _foliage.Build(Foliage);
         _grid ??= new ZoneGrid(this);
         _grid.Build(World, level.Zones);
         _grid.SetVisible(_showGrid);

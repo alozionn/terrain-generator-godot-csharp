@@ -76,13 +76,14 @@ Bracketed stages come later.
 - **Erosion:** runevision's mask-based erosion filter, applied as a stage after Detail.
 - **Resources (iron, wood…):** things sitting on the ground, placed with per-resource rules. They are not height bands.
 
-## Rendering: Terrain3D
+## Rendering
 
-[Terrain3D](https://github.com/TokisanGames/Terrain3D) (v1.1.0-rc1) draws the ground: clipmap mesh with LOD, collision, a 32-slot texture array with height blending, and the foliage instancer. We hand it three maps and a list of instance transforms; only `terrain/integration/` knows it exists.
+Our own renderer (`terrain/surface/`): at board scale (200–500 m) it costs about a third to half of what Terrain3D did (GPU 0.24–0.29 ms over an empty sky, against 0.53–0.73 ms; see `dev/PerfProbe.cs`). Terrain3D stays in the repo as a dev-only comparison (`dev/terrain3d/`, excluded from Ship builds) for when a much larger world might need its clipmap.
 
-- **Height map:** `WorldData.Height` as is.
-- **Control map:** per sample, a base and an overlay texture plus a blend amount (`GroundMaps`, plain C#). Band edges blend the lower band into the upper, and steep ground overlays the palette's cliff texture. A texture is never blended with itself, because Terrain3D renders that black.
-- **Colour map:** the band tint (so one grass texture serves "grass1" and "grass2") times a large-scale brightness drift.
+- **Ground mesh** (`GroundRenderer`): 64×64-quad chunks, one vertex per height sample, no LOD. Collision is one `HeightMapShape3D`.
+- **Ground painting** (`GroundMaps`, plain C#): per sample a base and an overlay texture plus a blend amount. Band edges blend the lower band into the upper; steep ground overlays the palette's cliff texture. A texture never blends with itself (Terrain3D rendered that black).
+- **Ground shader** (`ground.gdshader`): up to eight textures splatted by per-vertex weights (two RGBA8 attributes), blended by their height maps; only textures present at a pixel are sampled, usually one or two.
+- **Tint:** per vertex, the band tint (so one grass texture serves "grass1" and "grass2") times a large-scale brightness drift.
 - **Ground textures:** `data/ground/textures.json`, packed as albedo + height and normal + roughness. Files load through the importer so exports work; entries with `procedural` colours are noise stand-ins until real textures land (sand and seabed for now).
 - **Playable grid:** one decal per zone, projected onto render layer 1 only. Foliage is on layer 2, so it never gets grid lines.
 - POM can be an option later, but at a board-game camera distance and under dense grass it would barely show.
@@ -91,10 +92,10 @@ Bracketed stages come later.
 
 - **Sets** (`data/foliage/sets/*.json`, listed by the level): species with rules for band, height range, maximum slope, playable cells (avoid, with a margin, or allow, as grass does), cluster noise for groves and flower beds, density and spacing, scale, tilt and tint jitter.
 - **Placement** (`FoliageStage`, plain C#): a jittered grid per species, each species seeded from the world seed and its own name. Species placed earlier claim footprints that later ones avoid: rocks, then trees, then bushes, then ground cover.
-- **Meshes** (`data/foliage/meshes.json`): a res:// scene, or `procedural:`. Grass and flowers are generated blade clumps (three LODs) with `terrain/surface/grass.gdshader`: root-to-tip gradient, rolling wind gusts, sky-bent normals lit the same on both sides. Trees, bushes and rocks are single-surface stand-ins until real models land.
+- **Meshes** (`data/foliage/meshes.json`): mostly Quaternius Stylized Nature MegaKit models (free version, CC0, `assets/nature/`). A mesh with `wind` gets `foliage.gdshader`: the imported texture, colour, cut-out and normal map, plus sway with height, leaf flutter, soft canopy normals, optional `recolor` (palette colours by height, used for the pack grass and the red-textured bush) and optional `fade` (ground cover thins with distance like the grass). Species pick from several `meshes` per instance. `procedural:` Grass and flowers are generated blade clumps (three LODs) with `terrain/surface/grass.gdshader`: root-to-tip gradient, rolling wind gusts, sky-bent normals lit the same on both sides. Trees, bushes and rocks are single-surface stand-ins until real models land.
 - **Distance:** grass thins rather than shrinks. Each blade drops out at its own random distance (down to 30% of a clump), and each clump at its own distance beyond that, so the grass edge is a soft circle around the camera and never shows the instancer's cells.
 - **Grass scatter:** dense meadow patches from cluster noise plus sparse tufts in between; `playableDensity` and `playableScale` keep only a few tufts on the board.
-- **Rendering:** Terrain3D's instancer (LOD, visibility range, shadows).
+- **Rendering** (`FoliageInstancer`): per mesh, per 32 m chunk, one `MultiMeshInstance3D` per LOD with Godot visibility ranges.
 - **Next:** temperature map plus Voronoi regions to choose sets per area; real tree and rock models.
 - **Assets:** Quaternius Stylized Nature MegaKit; textures from Poly Haven, 3dtextures.me and freestylized (check its licence). The target look is painterly, anime, a bit Warcraft.
 

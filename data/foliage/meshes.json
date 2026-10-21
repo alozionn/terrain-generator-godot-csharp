@@ -1,17 +1,42 @@
 {
   "version": 1,
-  // order = instancer mesh id. Trees, bushes and rocks are "procedural:*" stand-ins until real models
-  // (e.g. Quaternius nature kit) land; grass and flowers are generated blade clumps with the wind shader.
+  // Models: Quaternius Stylized Nature MegaKit (free, CC0), assets/nature/. "wind" (metres of sway at the top) switches
+  // them to foliage.gdshader; "fade" thins ground cover with distance like the grass. The procedural stand-ins and the
+  // generated blade grass stay available.
   "meshes": [
-    { "id": "tree_round", "scene": "procedural:tree_round", "color": "#6fae45", "range": 400 },
-    { "id": "tree_pine",  "scene": "procedural:tree_pine",  "color": "#3f7f4a", "range": 400 },
-    { "id": "bush",       "scene": "procedural:bush",       "color": "#5f9a3a", "range": 200 },
-    { "id": "rock",       "scene": "procedural:rock",       "color": "#9a968e", "range": 300 },
+    { "id": "tree_common_1", "scene": "res://assets/nature/CommonTree_1.gltf", "wind": 0.25, "range": 450 },
+    { "id": "tree_common_2", "scene": "res://assets/nature/CommonTree_2.gltf", "wind": 0.25, "range": 450 },
+    { "id": "tree_common_3", "scene": "res://assets/nature/CommonTree_3.gltf", "wind": 0.25, "range": 450 },
+    { "id": "tree_common_4", "scene": "res://assets/nature/CommonTree_4.gltf", "wind": 0.25, "range": 450 },
+    { "id": "tree_common_5", "scene": "res://assets/nature/CommonTree_5.gltf", "wind": 0.25, "range": 450 },
+    { "id": "pine_1", "scene": "res://assets/nature/Pine_1.gltf", "wind": 0.2, "range": 450 },
+    { "id": "pine_2", "scene": "res://assets/nature/Pine_2.gltf", "wind": 0.2, "range": 450 },
+    { "id": "pine_3", "scene": "res://assets/nature/Pine_3.gltf", "wind": 0.2, "range": 450 },
+    { "id": "pine_4", "scene": "res://assets/nature/Pine_4.gltf", "wind": 0.2, "range": 450 },
+    { "id": "pine_5", "scene": "res://assets/nature/Pine_5.gltf", "wind": 0.2, "range": 450 },
+    { "id": "twisted_1", "scene": "res://assets/nature/TwistedTree_1.gltf", "wind": 0.2, "range": 450 },
+    { "id": "twisted_2", "scene": "res://assets/nature/TwistedTree_2.gltf", "wind": 0.2, "range": 450 },
+    { "id": "bush", "scene": "res://assets/nature/Bush_Common.gltf", "wind": 0.06, "range": 250, "recolor": ["#3c6522", "#8dbb48"] },
+    { "id": "bush_flowers", "scene": "res://assets/nature/Bush_Common_Flowers.gltf", "wind": 0.06, "range": 250, "recolor": ["#3c6522", "#8dbb48"] },
+    { "id": "rock_1", "scene": "res://assets/nature/Rock_Medium_1.gltf", "range": 300 },
+    { "id": "rock_2", "scene": "res://assets/nature/Rock_Medium_2.gltf", "range": 300 },
+    { "id": "rock_3", "scene": "res://assets/nature/Rock_Medium_3.gltf", "range": 300 },
+    { "id": "fern", "scene": "res://assets/nature/Fern_1.gltf", "wind": 0.08, "range": 120, "fade": true, "castShadows": false },
+    { "id": "plant_1", "scene": "res://assets/nature/Plant_1.gltf", "wind": 0.06, "range": 100, "fade": true, "castShadows": false },
+    { "id": "plant_7", "scene": "res://assets/nature/Plant_7.gltf", "wind": 0.06, "range": 100, "fade": true, "castShadows": false },
+    { "id": "grass_common", "scene": "res://assets/nature/Grass_Common_Short.gltf", "wind": 0.12, "leafNormals": 0.4, "range": 90, "fade": true, "castShadows": false, "recolor": ["#6e8f30", "#b8dc6a"] },
+    { "id": "grass_wispy", "scene": "res://assets/nature/Grass_Wispy_Short.gltf", "wind": 0.12, "leafNormals": 0.4, "range": 90, "fade": true, "castShadows": false, "recolor": ["#6e8f30", "#b8dc6a"] },
+    { "id": "flowers_3", "scene": "res://assets/nature/Flower_3_Group.gltf", "wind": 0.08, "range": 70, "fade": true, "castShadows": false },
+    { "id": "flowers_4", "scene": "res://assets/nature/Flower_4_Group.gltf", "wind": 0.08, "range": 70, "fade": true, "castShadows": false },
+    { "id": "clover_1", "scene": "res://assets/nature/Clover_1.gltf", "wind": 0.03, "range": 50, "fade": true, "castShadows": false },
+    { "id": "clover_2", "scene": "res://assets/nature/Clover_2.gltf", "wind": 0.03, "range": 50, "fade": true, "castShadows": false },
+    { "id": "pebble_1", "scene": "res://assets/nature/Pebble_Round_1.gltf", "range": 60, "fade": true, "castShadows": false },
+    { "id": "pebble_2", "scene": "res://assets/nature/Pebble_Round_3.gltf", "range": 60, "fade": true, "castShadows": false },
+
     { "id": "grass", "scene": "procedural:grass", "color": "#b4d966", "rootColor": "#7a9a38",
       "blades": 16, "bladeHeight": [0.22, 0.45], "bladeWidth": 0.05, "radius": 0.3,
       "lodDistance": 15, "range": 90, "castShadows": false },
-    { "id": "flower", "scene": "procedural:flowers", "color": "#9fcc5a", "rootColor": "#64852c", "headColor": "#f6e27a",
-      "blades": 8, "bladeHeight": [0.3, 0.5], "bladeWidth": 0.02, "radius": 0.2,
-      "lodDistance": 20, "range": 55, "castShadows": false }
+    { "id": "tree_round", "scene": "procedural:tree_round", "color": "#6fae45", "range": 400 },
+    { "id": "rock", "scene": "procedural:rock", "color": "#9a968e", "range": 300 }
   ]
 }
