@@ -1,7 +1,16 @@
 # Godot 4+ specific ignores
 .godot/
 /android/
-bin/
-obj/
+# .NET build output (root project and tests), not addon binaries
+/bin/
+/obj/
+tests/**/bin/
+tests/**/obj/
 .scratch/
 local.settings.json
+# Terrain3D (dev only): keep just the Windows x64 libraries, the other platforms come from its release zip
+addons/terrain_3d/bin/*
+!addons/terrain_3d/bin/libterrain.windows.debug.x86_64.dll
+!addons/terrain_3d/bin/libterrain.windows.release.x86_64.dll
+# lock-file copies Windows leaves next to loaded DLLs
+*.TMP
