@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "id": "meadow",
+  "blend": 0.25,
+  "bands": [
+    { "name": "seabed", "from": -100, "color": "#3d5a73", "tex": "seabed" },
+    { "name": "shore",  "from": -1.0, "color": "#b9a47a", "tex": "sand", "tint": "#c9bfae" },
+    { "name": "sand",   "from": 0.3,  "color": "#e2d39f", "tex": "sand" },
+    { "name": "grass",  "from": 1.0,  "color": "#86c255", "tex": "grass", "tint": "#d8f0b0" },
+    { "name": "meadow", "from": 1.6,  "color": "#5f9f3d", "tex": "grass", "tint": "#b8d890" },
+    { "name": "hill",   "from": 3.0,  "color": "#8b9a58", "tex": "grass", "tint": "#c8c890" },
+    { "name": "rock",   "from": 7.0,  "color": "#8d8a84", "tex": "rock" },
+    { "name": "snow",   "from": 13.0, "color": "#f1f3f5", "tex": "rock", "tint": "#ffffff" }
+  ],
+  "cliff": { "tex": "rock", "slopeStart": 32, "slopeFull": 48 },
+  "macro": { "amount": 0.12, "frequency": 0.015 }
+}

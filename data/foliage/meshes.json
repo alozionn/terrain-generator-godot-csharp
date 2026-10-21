@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  // order = instancer mesh id. "procedural:*" are stand-ins until real models (e.g. Quaternius nature kit) land.
+  "meshes": [
+    { "id": "tree_round", "scene": "procedural:tree_round", "color": "#6fae45", "range": 400 },
+    { "id": "tree_pine",  "scene": "procedural:tree_pine",  "color": "#3f7f4a", "range": 400 },
+    { "id": "bush",       "scene": "procedural:bush",       "color": "#5f9a3a", "range": 200 },
+    { "id": "rock",       "scene": "procedural:rock",       "color": "#9a968e", "range": 300 },
+    { "id": "grass",      "scene": "procedural:card", "color": "#7fb84a", "size": [0.7, 0.45], "range": 70, "castShadows": false },
+    { "id": "flower",     "scene": "procedural:card", "color": "#f2d14a", "size": [0.35, 0.3], "range": 60, "castShadows": false }
+  ]
+}

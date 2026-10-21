@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  // order = GPU texture id. Files are RGB albedo + height in alpha, RGB normal + roughness in alpha (Terrain3D packing).
+  "textures": [
+    { "id": "grass",  "albedoHeight": "res://assets/textures/ground/ground037_alb_ht.png", "normalRoughness": "res://assets/textures/ground/ground037_nrm_rgh.png", "uvScale": 0.12 },
+    { "id": "rock",   "albedoHeight": "res://assets/textures/ground/rock023_alb_ht.png",   "normalRoughness": "res://assets/textures/ground/rock023_nrm_rgh.png",   "uvScale": 0.08 },
+    { "id": "sand",   "procedural": ["#d8c79b", "#bfa97a"], "uvScale": 0.15 },
+    { "id": "seabed", "procedural": ["#8a7d63", "#5f5745"], "uvScale": 0.1 }
+  ]
+}

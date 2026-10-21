@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "id": "twin_peaks",
+  // island with two mountains to the north, a gentle hill west and a cove cutting in from the south
+  "falloff": { "kind": "island", "radius": 0.38, "edge": 0.1, "coastNoise": 0.06, "landHeight": 1.2, "seaDepth": -6 },
+  "stamps": [
+    { "type": "mountain", "at": [0.74, 0.22], "radius": 34, "height": 16 },
+    { "type": "mountain", "at": [0.56, 0.16], "radius": 24, "height": 10 },
+    { "type": "hill",     "at": [0.22, 0.48], "radius": 22, "height": 3 },
+    { "type": "cove",     "at": [0.5, 0.88],  "radius": 34, "height": 3 }
+  ],
+  "detail": { "amplitude": 1.4, "frequency": 0.025, "octaves": 4, "warp": 14 }
+}

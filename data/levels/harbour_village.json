@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "id": "harbour_village",
+  "seed": 1234,
+  "layout": "twin_peaks",
+  "palette": "meadow",
+  "size": 200,
+  "sampleSpacing": 1.0,
+  "cellSize": 2.0,
+  "zones": [
+    { "id": "village", "origin": [35, 38], "cells": [30, 30], "height": [1.0, 1.4] },
+    { "id": "port",    "origin": [40, 74], "cells": [20, 5],  "height": [0.1, 0.3], "blend": 4, "touchesSea": true },
+    { "id": "outpost", "origin": [71, 19], "cells": [6, 6],   "height": [6.0, 6.4], "blend": 6 }
+  ],
+  "foliage": ["temperate"],
+  "ocean": ""
+}
