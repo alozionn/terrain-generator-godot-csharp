@@ -40,14 +40,14 @@ Probe modes: `none`, `flat`, `ground`, `ground_foliage`, `t3d`, `t3d_lite`, `t3d
 - Ground: own renderer, up to 8 height-blended textures per palette, cliffs by slope, tints, macro variation. About 0.25–0.28 ms GPU over an empty sky at 1080p (Terrain3D was 0.53–0.73 ms).
 - Foliage: rule-based seeded scatter in sets (rocks, trees, bushes, plants, grass, flowers, clover, pebbles), mesh variants, MegaKit models with wind, grass thinning in a circle around the camera.
 - Board: zone grid decals, pre-placed buildings fitted to their footprint.
-- Frame: 1.38–1.60 ms for the full demo at 1080p (with SSAO about 0.5 ms and 2 shadow cascades).
+- Frame: 1.18–1.46 ms for the full demo at 1080p (SSAO about 0.5 ms; sun 2 cascades over 250 m, 2048 shadow map; bushes and ground cover cast no shadows).
 
 ## Next steps
 
 Suggested order; each one stands on its own.
 
 1. **Foliage look at board distance.** Pack grass reads as sparse specks from the 30 m camera. Try the generated blade grass for dense meadows plus pack tufts for detail (data only, `data/foliage/`), and tune scales and densities.
-2. **Foliage cost toward 1 ms.** No shadows from bushes and small plants, smaller leaf textures or mipmap bias, and decide SSAO (about 0.5 ms on its own).
+2. **Frame cost toward 1 ms.** Decide SSAO (about 0.5 ms on its own), try Vulkan vs D3D12 and the Mobile renderer, profile per pass (Visual Profiler, RenderDoc), smaller leaf textures, blob shadows for tree canopies.
 3. **Temperature map + Voronoi regions** that choose which foliage set grows where (forest, meadow, pond edge), instead of one set for the whole island.
 4. **Layout pass.** Move the mountain that blocks the board view, raise the island base so decor isn't all grass, add more stamps and a second layout. Consider a small painted image as a layout input.
 5. **Paths and a "nothing grows here" mask.** Painted onto the ground (dirt texture) and into foliage rules; the pack's RockPath models can line them.

@@ -15,7 +15,7 @@ namespace Terrain.Dev;
 /// <summary>
 /// Isolated ground-rendering cost: same level, same camera, sun with shadows, procedural sky, no decals, SSAO, fog or
 /// UI. Measures GPU time with the viewport's render timer (3 s settle, then 3 s average), prints it, quits.
-/// godot --path . res://dev/perf_probe.tscn -- --mode MODE [--view x,z,yaw,pitch,dist] [--splits 1|2|4] [--shadowdist m]
+/// godot --path . res://dev/perf_probe.tscn -- --mode MODE [--view x,z,yaw,pitch,dist] [--splits 1|2|4] [--shadowdist m] [--shadowsize px]
 /// Modes: none, flat (vertex colours only), ground (our renderer), ground_foliage, t3d, t3d_lite, t3d_foliage.
 /// </summary>
 public partial class PerfProbe : Node3D
@@ -91,6 +91,8 @@ public partial class PerfProbe : Node3D
         cam.Position = focus + dir * view[4];
         cam.LookAt(focus);
 
+        int shadowSize = int.Parse(Arg("--shadowsize", "0"));
+        if (shadowSize > 0) RenderingServer.DirectionalShadowAtlasSetSize(shadowSize, true);
         _viewport = GetViewport().GetViewportRid();
         RenderingServer.ViewportSetMeasureRenderTime(_viewport, true);
     }

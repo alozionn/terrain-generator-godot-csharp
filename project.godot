@@ -43,3 +43,4 @@ enabled=PackedStringArray("res://addons/debug_menu/plugin.cfg", "res://addons/te
 [rendering]
 
 rendering_device/driver.windows="d3d12"
+lights_and_shadows/directional_shadow/size=2048

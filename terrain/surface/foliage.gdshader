@@ -57,7 +57,9 @@ void vertex() {
 
 void fragment() {
 	vec4 tex = texture(albedo_texture, UV);
-	if (alpha_cut > 0.0 && tex.a < alpha_cut) discard;
+	// built-in scissor rather than a manual discard, so Godot can use its alpha-scissor depth and shadow paths
+	ALPHA = alpha_cut > 0.0 ? tex.a : 1.0;
+	ALPHA_SCISSOR_THRESHOLD = max(alpha_cut, 0.001);
 	vec3 base = tex.rgb * albedo_color.rgb;
 	if (recolor) {
 		float luma = dot(tex.rgb, vec3(0.299, 0.587, 0.114));
