@@ -34,6 +34,8 @@ public sealed class SpeciesDefinition
     public bool AvoidPlayable { get; set; } = true;
     /// <summary>Extra metres kept clear around playable zones.</summary>
     public float PlayableMargin { get; set; }
+    /// <summary>Scale multiplier on playable cells (e.g. shorter grass so the board stays readable).</summary>
+    public float PlayableScale { get; set; } = 1f;
     public ClusterDefinition Clusters { get; set; } = new();
     public float[] Scale { get; set; } = { 0.8f, 1.2f };
     /// <summary>Random lean in degrees.</summary>
@@ -63,13 +65,22 @@ public sealed class FoliageMeshSetDefinition
 public sealed class FoliageMeshDefinition
 {
     public string Id { get; set; } = "";
-    /// <summary>res:// scene, or "procedural:kind" for a built-in stand-in (tree_round, tree_pine, bush, rock, card).</summary>
+    /// <summary>res:// scene, or "procedural:kind": grass, flowers, or a stand-in tree_round, tree_pine, bush, rock.</summary>
     public string Scene { get; set; } = "";
     /// <summary>"#rrggbb" base colour for procedural stand-ins.</summary>
     public string Color { get; set; } = "#7fae4a";
-    /// <summary>Card size in metres (procedural:card).</summary>
-    public float[] Size { get; set; } = { 0.6f, 0.5f };
     /// <summary>Distance at which the mesh stops drawing.</summary>
     public float Range { get; set; } = 150f;
+    /// <summary>Clumps (procedural:grass, procedural:flowers): blade root colour; "color" is the tip.</summary>
+    public string RootColor { get; set; } = "#3a5a1e";
+    /// <summary>Flower head colour (procedural:flowers).</summary>
+    public string HeadColor { get; set; } = "#f2d14a";
+    public int Blades { get; set; } = 22;
+    public float[] BladeHeight { get; set; } = { 0.25f, 0.5f };
+    public float BladeWidth { get; set; } = 0.05f;
+    /// <summary>Clump radius in metres.</summary>
+    public float Radius { get; set; } = 0.3f;
+    /// <summary>Distance where the clump switches to its lighter LOD (about a third of the blades, wider).</summary>
+    public float LodDistance { get; set; } = 25f;
     public bool CastShadows { get; set; } = true;
 }

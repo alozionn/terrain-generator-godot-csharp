@@ -34,7 +34,7 @@ public partial class DemoRoot : Node3D
         if (i >= 0 && i + 1 < args.Length)
         {
             _shotPath = args[i + 1];
-            _shotFrames = 30;
+            _shotFrames = 120;
         }
         // --view x,z,yaw,pitch,distance frames a shot; --nogrid hides the cell grid
         int v = Array.IndexOf(args, "--view");
@@ -83,6 +83,7 @@ public partial class DemoRoot : Node3D
         if (_shotFrames > 0 && --_shotFrames == 0)
         {
             GetViewport().GetTexture().GetImage().SavePng(_shotPath);
+            GD.Print($"[Demo] {Engine.GetFramesPerSecond()} fps, {Performance.GetMonitor(Performance.Monitor.RenderTotalPrimitivesInFrame) / 1e6:F2} M primitives");
             GetTree().Quit();
         }
     }

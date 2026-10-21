@@ -64,6 +64,7 @@ public static class FoliageStage
                         if (claimed.Blocked(x, z)) continue;
 
                         float scale = Lerp(sp.Scale[0], sp.Scale[^1], Unit(Seeds.Mix(h + 4)));
+                        if (sp.PlayableScale != 1f && NearPlayable(w, x, z, 0f)) scale *= sp.PlayableScale;
                         float tilt = sp.Tilt * MathF.PI / 180f;
                         list.Add(new FoliageInstance(x, y, z,
                             Unit(Seeds.Mix(h + 5)) * MathF.Tau,

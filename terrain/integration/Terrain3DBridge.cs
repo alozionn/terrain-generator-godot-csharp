@@ -83,7 +83,9 @@ internal sealed class Terrain3DBridge
             var asset = Terrain3DMeshAsset.Instantiate();
             asset.Name = def.Id;
             asset.SceneFile = FoliageMeshes.Scene(def);
-            asset.Lod0Range = def.Range;
+            bool clump = def.Scene is "procedural:grass" or "procedural:flowers";
+            asset.Lod0Range = clump ? Math.Min(def.LodDistance, def.Range) : def.Range;
+            if (clump) asset.Lod1Range = def.Range;
             asset.CastShadows = def.CastShadows ? RenderingServer.ShadowCastingSetting.On : RenderingServer.ShadowCastingSetting.Off;
             asset.VisibilityLayers = FoliageLayer; // keeps the zone-grid decals off foliage
             _meshIds[def.Id] = _meshes.Count;

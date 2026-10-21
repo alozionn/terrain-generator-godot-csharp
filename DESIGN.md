@@ -91,9 +91,10 @@ Bracketed stages come later.
 
 - **Sets** (`data/foliage/sets/*.json`, listed by the level): species with rules for band, height range, maximum slope, playable cells (avoid, with a margin, or allow, as grass does), cluster noise for groves and flower beds, density and spacing, scale, tilt and tint jitter.
 - **Placement** (`FoliageStage`, plain C#): a jittered grid per species, each species seeded from the world seed and its own name. Species placed earlier claim footprints that later ones avoid: rocks, then trees, then bushes, then ground cover.
-- **Meshes** (`data/foliage/meshes.json`): a res:// scene, or a `procedural:` stand-in (round tree, pine, bush, rock, crossed card) until real models land.
+- **Meshes** (`data/foliage/meshes.json`): a res:// scene, or `procedural:`. Grass and flowers are generated blade clumps (curved tapering blades, a dense LOD0 and a sparse LOD1) with `terrain/surface/grass.gdshader`: root-to-tip gradient, rolling wind gusts, sky-bent normals, and blades that shrink to nothing before the instancer culls their cell, so the grass edge never shows. Trees, bushes and rocks are stand-ins until real models land.
+- **Board readability:** `playableScale` shortens a species on playable cells (grass at 0.6), so the grid stays visible.
 - **Rendering:** Terrain3D's instancer (LOD, visibility range, shadows).
-- **Next:** temperature map plus Voronoi regions to choose sets per area; instanced grass blades with a wind shader in place of the card stand-in.
+- **Next:** temperature map plus Voronoi regions to choose sets per area; real tree and rock models.
 - **Assets:** Quaternius Stylized Nature MegaKit; textures from Poly Haven, 3dtextures.me and freestylized (check its licence). The target look is painterly, anime, a bit Warcraft.
 
 ## Not yet
