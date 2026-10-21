@@ -18,6 +18,8 @@ public sealed class LevelDefinition
     public List<ZoneDefinition> Zones { get; set; } = new();
     /// <summary>Foliage set ids (data/foliage/sets/*.json), placed in order.</summary>
     public List<string> Foliage { get; set; } = new();
+    /// <summary>Pre-placed buildings and props.</summary>
+    public List<PlacementDefinition> Placements { get; set; } = new();
     /// <summary>Optional ocean preset id; empty means no ocean.</summary>
     public string Ocean { get; set; } = "";
 }
@@ -38,6 +40,27 @@ public sealed class ZoneDefinition
     public float RollFrequency { get; set; } = 0.04f;
     /// <summary>Constraint: at least one cell must border water.</summary>
     public bool TouchesSea { get; set; }
+}
+
+/// <summary>
+/// A building or prop standing on a footprint of cells. It sits at the lowest ground under the footprint, so its
+/// base sinks into any higher ground rather than floating; the terrain is not flattened for it.
+/// </summary>
+public sealed class PlacementDefinition
+{
+    public string Id { get; set; } = "";
+    /// <summary>res:// scene (.tscn, .glb…).</summary>
+    public string Scene { get; set; } = "";
+    /// <summary>Top-left cell (x, z).</summary>
+    public int[] Cell { get; set; } = { 0, 0 };
+    /// <summary>Footprint in cells (x, z), 1–4 per side.</summary>
+    public int[] Cells { get; set; } = { 1, 1 };
+    /// <summary>Degrees around Y.</summary>
+    public float Rotation { get; set; }
+    /// <summary>Scale the model uniformly so its widest side fills the footprint; false keeps its authored size.</summary>
+    public bool Fit { get; set; } = true;
+    /// <summary>Fraction of the footprint the model fills when fitted.</summary>
+    public float Fill { get; set; } = 0.9f;
 }
 
 /// <summary>The authored silhouette: island falloff, height stamps and noise detail.</summary>

@@ -22,7 +22,8 @@ public sealed class FoliageResult
 /// </summary>
 public static class FoliageStage
 {
-    public static FoliageResult Run(WorldData w, IReadOnlyList<FoliageSetDefinition> sets, uint seed)
+    /// <param name="occupied">Cells nothing may grow on (building footprints), indexed cz * Cells + cx; null for none.</param>
+    public static FoliageResult Run(WorldData w, IReadOnlyList<FoliageSetDefinition> sets, uint seed, bool[] occupied = null)
     {
         var result = new FoliageResult();
         var claimed = new Footprints();
@@ -62,6 +63,7 @@ public static class FoliageStage
                         if (NormalY(w, sx, sz) < cosMax) continue;
                         if (sp.AvoidPlayable && NearPlayable(w, x, z, sp.PlayableMargin)) continue;
                         if (claimed.Blocked(x, z)) continue;
+                        if (occupied != null && occupied[Math.Min(w.Cells - 1, (int)(z / w.CellSize)) * w.Cells + Math.Min(w.Cells - 1, (int)(x / w.CellSize))]) continue;
 
                         float scale = Lerp(sp.Scale[0], sp.Scale[^1], Unit(Seeds.Mix(h + 4)));
                         if (sp.PlayableScale != 1f && NearPlayable(w, x, z, 0f)) scale *= sp.PlayableScale;

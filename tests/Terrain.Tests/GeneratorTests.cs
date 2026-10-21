@@ -88,6 +88,15 @@ public class GeneratorTests
     }
 
     [Test]
+    public async Task PlacementOffTheBoardIsReported()
+    {
+        var (level, layout, palette) = Sample();
+        level.Placements = [new PlacementDefinition { Id = "stray", Cell = [2, 2], Cells = [2, 2] }];
+        var issues = LevelGenerator.Generate(level, layout, palette).Issues;
+        await Assert.That(issues.Any(i => i.Contains("stray") && i.Contains("4 cells"))).IsTrue();
+    }
+
+    [Test]
     public async Task BandLookupUsesStartHeights()
     {
         var bands = new[] { new BandDefinition { From = -100 }, new BandDefinition { From = -1 }, new BandDefinition { From = 0.3f } };

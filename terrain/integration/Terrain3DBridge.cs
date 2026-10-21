@@ -84,8 +84,13 @@ internal sealed class Terrain3DBridge
             asset.Name = def.Id;
             asset.SceneFile = FoliageMeshes.Scene(def);
             bool clump = def.Scene is "procedural:grass" or "procedural:flowers";
+            // clumps: full near, a third of the blades from LodDistance, a sixth from 3x LodDistance
             asset.Lod0Range = clump ? Math.Min(def.LodDistance, def.Range) : def.Range;
-            if (clump) asset.Lod1Range = def.Range;
+            if (clump)
+            {
+                asset.Lod1Range = Math.Min(def.LodDistance * 3, def.Range);
+                asset.Lod2Range = def.Range;
+            }
             asset.CastShadows = def.CastShadows ? RenderingServer.ShadowCastingSetting.On : RenderingServer.ShadowCastingSetting.Off;
             asset.VisibilityLayers = FoliageLayer; // keeps the zone-grid decals off foliage
             _meshIds[def.Id] = _meshes.Count;
@@ -157,30 +162,48 @@ internal sealed class Terrain3DBridge
         _ => Terrain3D.RegionSizeEnum.Size1024,
     };
 
-    static Image HeightImage(WorldData w) =>
-        Image.CreateFromData(w.Samples, w.Samples, false, Image.Format.Rf, MemoryMarshal.AsBytes(w.Height.AsSpan()).ToArray());
+    // Images cover whole regions. Terrain3D fills the rest of a region with height 0 and texture 0, which showed as
+    // flat grass z-fighting with the sea at y = 0, so the edge samples are repeated out to the region border instead.
+
+    static int Padded(WorldData w) => (int)RegionSizeFor(w.Samples) * (int)Math.Ceiling(w.Samples / (double)(int)RegionSizeFor(w.Samples));
+
+    static int Source(WorldData w, int i, int size) => w.Index(Math.Min(i % size, w.Samples - 1), Math.Min(i / size, w.Samples - 1));
+
+    static Image HeightImage(WorldData w)
+    {
+        int n = Padded(w);
+        var h = new float[n * n];
+        for (int i = 0; i < h.Length; i++) h[i] = w.Height[Source(w, i, n)];
+        return Image.CreateFromData(n, n, false, Image.Format.Rf, MemoryMarshal.AsBytes(h.AsSpan()).ToArray());
+    }
 
     /// <summary>Control pixels are raw uint32 bit patterns stored in an RF image (Terrain3D reads them as uints).</summary>
     static Image ControlImage(WorldData w, GroundMaps g)
     {
-        var bits = new uint[w.Height.Length];
-        for (int i = 0; i < bits.Length; i++) bits[i] = GroundMaps.EncodeTerrain3D(g.Base[i], g.Overlay[i], g.Blend[i]);
-        return Image.CreateFromData(w.Samples, w.Samples, false, Image.Format.Rf, MemoryMarshal.AsBytes(bits.AsSpan()).ToArray());
+        int n = Padded(w);
+        var bits = new uint[n * n];
+        for (int i = 0; i < bits.Length; i++)
+        {
+            int s = Source(w, i, n);
+            bits[i] = GroundMaps.EncodeTerrain3D(g.Base[s], g.Overlay[s], g.Blend[s]);
+        }
+        return Image.CreateFromData(n, n, false, Image.Format.Rf, MemoryMarshal.AsBytes(bits.AsSpan()).ToArray());
     }
 
     /// <summary>RGB tints the albedo; alpha is the roughness modifier, where 0.5 leaves it unchanged.</summary>
     static Image ColorImage(WorldData w, GroundMaps g)
     {
-        var px = new byte[w.Height.Length * 4];
-        for (int i = 0; i < g.Tint.Length; i++)
+        int n = Padded(w);
+        var px = new byte[n * n * 4];
+        for (int i = 0; i < n * n; i++)
         {
-            var t = g.Tint[i];
+            var t = g.Tint[Source(w, i, n)];
             px[i * 4] = (byte)(Math.Clamp(t.X, 0f, 1f) * 255f);
             px[i * 4 + 1] = (byte)(Math.Clamp(t.Y, 0f, 1f) * 255f);
             px[i * 4 + 2] = (byte)(Math.Clamp(t.Z, 0f, 1f) * 255f);
             px[i * 4 + 3] = 128;
         }
-        return Image.CreateFromData(w.Samples, w.Samples, false, Image.Format.Rgba8, px);
+        return Image.CreateFromData(n, n, false, Image.Format.Rgba8, px);
     }
 
     /// <summary>Noise between two colours, its value doubling as height; flat normal, fairly rough.</summary>

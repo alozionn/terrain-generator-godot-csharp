@@ -18,7 +18,9 @@ public partial class DemoRoot : Node3D
     float _yaw = 35f, _pitch = 48f, _distance = 150f;
     bool _dragging;
     int _palette;
-    int _shotFrames = -1;
+    // shot mode: settle for 3 s, then average frame time over the next 3 s, save, quit
+    double _shotClock = -1, _shotMeasured;
+    int _shotSamples;
     string _shotPath;
 
     public override void _Ready()
@@ -27,6 +29,7 @@ public partial class DemoRoot : Node3D
         _camera = GetNode<Camera3D>("Camera");
         _info = GetNode<Label>("Ui/Info");
         _terrain.Generated += OnGenerated;
+        GetNodeOrNull("/root/DebugMenu")?.Set("style", 1); // compact FPS readout (F3 cycles)
         OnGenerated();
 
         var args = OS.GetCmdlineUserArgs();
@@ -34,7 +37,7 @@ public partial class DemoRoot : Node3D
         if (i >= 0 && i + 1 < args.Length)
         {
             _shotPath = args[i + 1];
-            _shotFrames = 120;
+            _shotClock = 0;
         }
         // --view x,z,yaw,pitch,distance frames a shot; --nogrid hides the cell grid
         int v = Array.IndexOf(args, "--view");
@@ -80,11 +83,18 @@ public partial class DemoRoot : Node3D
             UpdateCamera();
         }
 
-        if (_shotFrames > 0 && --_shotFrames == 0)
+        if (_shotClock >= 0)
         {
-            GetViewport().GetTexture().GetImage().SavePng(_shotPath);
-            GD.Print($"[Demo] {Engine.GetFramesPerSecond()} fps, {Performance.GetMonitor(Performance.Monitor.RenderTotalPrimitivesInFrame) / 1e6:F2} M primitives");
-            GetTree().Quit();
+            _shotClock += delta;
+            if (_shotClock > 3) { _shotMeasured += delta; _shotSamples++; }
+            if (_shotClock > 6)
+            {
+                GetViewport().GetTexture().GetImage().SavePng(_shotPath);
+                double ms = _shotMeasured / _shotSamples * 1000;
+                GD.Print($"[Demo] {1000 / ms:F0} fps ({ms:F2} ms), {Performance.GetMonitor(Performance.Monitor.RenderTotalPrimitivesInFrame) / 1e6:F2} M primitives, {Performance.GetMonitor(Performance.Monitor.RenderTotalDrawCallsInFrame)} draw calls");
+                GetTree().Quit();
+                _shotClock = -1;
+            }
         }
     }
 

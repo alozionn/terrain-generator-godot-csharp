@@ -7,9 +7,9 @@
     { "id": "tree_pine",  "scene": "procedural:tree_pine",  "color": "#3f7f4a", "range": 400 },
     { "id": "bush",       "scene": "procedural:bush",       "color": "#5f9a3a", "range": 200 },
     { "id": "rock",       "scene": "procedural:rock",       "color": "#9a968e", "range": 300 },
-    { "id": "grass", "scene": "procedural:grass", "color": "#b9dc6a", "rootColor": "#64852c",
-      "blades": 30, "bladeHeight": [0.25, 0.5], "bladeWidth": 0.05, "radius": 0.4,
-      "lodDistance": 30, "range": 120, "castShadows": false },
+    { "id": "grass", "scene": "procedural:grass", "color": "#b4d966", "rootColor": "#7a9a38",
+      "blades": 16, "bladeHeight": [0.22, 0.45], "bladeWidth": 0.05, "radius": 0.3,
+      "lodDistance": 25, "range": 170, "castShadows": false },
     { "id": "flower", "scene": "procedural:flowers", "color": "#9fcc5a", "rootColor": "#64852c", "headColor": "#f6e27a",
       "blades": 8, "bladeHeight": [0.3, 0.5], "bladeWidth": 0.02, "radius": 0.2,
       "lodDistance": 20, "range": 55, "castShadows": false }

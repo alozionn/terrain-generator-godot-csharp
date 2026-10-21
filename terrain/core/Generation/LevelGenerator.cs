@@ -35,7 +35,7 @@ public static class LevelGenerator
         DetailStage.Run(world, layout.Detail, Seeds.Derive(level.Seed, "detail"));
         ZoneStage.Run(world, level.Zones, Seeds.Derive(level.Seed, "zones"));
         BandStage.Run(world, palette);
-        var issues = ConstraintStage.Run(world, level.Zones);
+        var issues = ConstraintStage.Run(world, level.Zones, level.Placements);
 
         return new GenerationResult { World = world, Issues = issues };
     }

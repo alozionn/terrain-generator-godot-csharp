@@ -1,5 +1,6 @@
 #nullable disable
 using System;
+using System.Collections.Generic;
 
 namespace Terrain.Core.World;
 
@@ -71,6 +72,31 @@ public sealed class WorldData
                 float h = Height[z * Samples + x];
                 lo = MathF.Min(lo, h);
                 hi = MathF.Max(hi, h);
+            }
+        return (lo, hi);
+    }
+
+    /// <summary>Per-cell flags for the given footprints (x, z, sizeX, sizeZ), clipped to the map.</summary>
+    public bool[] CellMask(IEnumerable<(int x, int z, int sx, int sz)> footprints)
+    {
+        var mask = new bool[Cells * Cells];
+        foreach (var (x0, z0, sx, sz) in footprints)
+            for (int z = Math.Max(0, z0); z < Math.Min(Cells, z0 + sz); z++)
+                for (int x = Math.Max(0, x0); x < Math.Min(Cells, x0 + sx); x++)
+                    mask[z * Cells + x] = true;
+        return mask;
+    }
+
+    /// <summary>Lowest and highest ground under a footprint of cells (clipped to the map).</summary>
+    public (float min, float max) FootprintRange(int cx, int cz, int sizeX, int sizeZ)
+    {
+        float lo = float.MaxValue, hi = float.MinValue;
+        for (int z = Math.Max(0, cz); z < Math.Min(Cells, cz + sizeZ); z++)
+            for (int x = Math.Max(0, cx); x < Math.Min(Cells, cx + sizeX); x++)
+            {
+                var (a, b) = CellRange(x, z);
+                lo = MathF.Min(lo, a);
+                hi = MathF.Max(hi, b);
             }
         return (lo, hi);
     }

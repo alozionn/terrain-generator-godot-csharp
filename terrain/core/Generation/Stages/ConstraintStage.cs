@@ -11,7 +11,7 @@ public static class ConstraintStage
     /// <summary>Allowed overshoot of a zone's height window, in metres.</summary>
     public const float WindowTolerance = 0.02f;
 
-    public static List<string> Run(WorldData w, IReadOnlyList<ZoneDefinition> zones)
+    public static List<string> Run(WorldData w, IReadOnlyList<ZoneDefinition> zones, IReadOnlyList<PlacementDefinition> placements = null)
     {
         var issues = new List<string>();
         for (int zi = 0; zi < zones.Count; zi++)
@@ -35,6 +35,20 @@ public static class ConstraintStage
             if (owned == 0) issues.Add($"zone '{zone.Id}' has no cells");
             if (outside > 0) issues.Add($"zone '{zone.Id}': {outside} of {owned} cells leave the height window [{zone.Height[0]}, {zone.Height[1]}]");
             if (zone.TouchesSea && owned > 0 && !seaFound) issues.Add($"zone '{zone.Id}' must touch the sea but no cell borders water");
+        }
+        foreach (var p in placements ?? System.Array.Empty<PlacementDefinition>())
+        {
+            int ox = p.Cell[0], oz = p.Cell[1];
+            if (ox < 0 || oz < 0 || ox + p.Cells[0] > w.Cells || oz + p.Cells[1] > w.Cells)
+            {
+                issues.Add($"placement '{p.Id}' reaches outside the map");
+                continue;
+            }
+            int decor = 0;
+            for (int cz = oz; cz < oz + p.Cells[1]; cz++)
+                for (int cx = ox; cx < ox + p.Cells[0]; cx++)
+                    if (!w.IsPlayable(cx, cz)) decor++;
+            if (decor > 0) issues.Add($"placement '{p.Id}' has {decor} cells outside every playable zone");
         }
         return issues;
     }

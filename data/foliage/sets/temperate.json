@@ -15,7 +15,7 @@
     { "id": "bushes", "mesh": "bush", "density": 4, "spacing": 2.5, "footprint": 1,
       "bands": ["grass", "meadow", "hill"], "height": [1.0, 8], "maxSlope": 30, "playableMargin": 1,
       "scale": [0.7, 1.4], "clusters": { "frequency": 0.04, "threshold": -0.1, "softness": 0.3 } },
-    { "id": "grass", "mesh": "grass", "density": 320, "spacing": 0.55,
+    { "id": "grass", "mesh": "grass", "density": 600, "spacing": 0.4,
       "bands": ["grass", "meadow", "hill"], "height": [1.0, 9], "maxSlope": 35, "avoidPlayable": false, "playableScale": 0.6,
       "scale": [0.75, 1.3], "tilt": 8, "tintJitter": 0.12 },
     { "id": "flowers", "mesh": "flower", "density": 18, "spacing": 1.0,

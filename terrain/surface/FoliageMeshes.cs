@@ -31,6 +31,7 @@ internal static class FoliageMeshes
                 var material = GrassMaterial(def, flowers);
                 lods.Add(Clump(def, def.Blades, 1f, flowers, material));
                 lods.Add(Clump(def, Math.Max(3, def.Blades / 3), 1.8f, flowers, material));
+                lods.Add(Clump(def, Math.Max(2, def.Blades / 6), 2.6f, flowers, material));
                 break;
             case "tree_round":
                 lods.Add(Parts(
@@ -154,8 +155,8 @@ internal static class FoliageMeshes
         m.SetShaderParameter("tip_color", ToColor(def.Color));
         m.SetShaderParameter("head_color", ToColor(def.HeadColor));
         // flat before the instancer culls the cell, so the grass edge never shows as squares
-        m.SetShaderParameter("fade_start", def.Range * 0.45f);
-        m.SetShaderParameter("fade_end", def.Range * 0.85f);
+        m.SetShaderParameter("fade_start", def.Range * 0.6f);
+        m.SetShaderParameter("fade_end", def.Range * 0.92f);
         return m;
     }
 

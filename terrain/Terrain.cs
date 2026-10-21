@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Godot;
 using Terrain.Core.Foliage;
 using Terrain.Core.Generation;
@@ -24,6 +25,7 @@ public partial class Terrain : Node3D
 
     Terrain3DBridge _bridge;
     ZoneGrid _grid;
+    Placements _placements;
     bool _showGrid = true;
 
     public LevelDefinition Level { get; private set; }
@@ -79,7 +81,8 @@ public partial class Terrain : Node3D
         World = result.World;
         Issues = result.Issues;
         Ground = GroundMaps.Build(World, palette, _bridge.TextureIds, level.Seed);
-        Foliage = FoliageStage.Run(World, sets, level.Seed);
+        var occupied = World.CellMask(level.Placements.Select(p => (p.Cell[0], p.Cell[1], p.Cells[0], p.Cells[1])));
+        Foliage = FoliageStage.Run(World, sets, level.Seed, occupied);
         var generated = Time.GetTicksMsec();
 
         _bridge.Upload(World, Ground);
@@ -87,6 +90,8 @@ public partial class Terrain : Node3D
         _grid ??= new ZoneGrid(this);
         _grid.Build(World, level.Zones);
         _grid.SetVisible(_showGrid);
+        _placements ??= new Placements(this);
+        _placements.Build(World, level.Placements);
 
         GD.Print($"[Terrain] '{level.Id}' seed {level.Seed}: {World.Cells}x{World.Cells} cells, {World.Samples}² samples, {Foliage.Count} foliage, " +
                  $"generate {generated - started} ms, upload {Time.GetTicksMsec() - generated} ms");

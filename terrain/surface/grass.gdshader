@@ -7,7 +7,7 @@ group_uniforms colour;
 uniform vec3 root_color : source_color = vec3(0.22, 0.36, 0.12);
 uniform vec3 tip_color : source_color = vec3(0.62, 0.82, 0.33);
 uniform vec3 head_color : source_color = vec3(0.95, 0.82, 0.3);
-uniform float root_ao : hint_range(0.0, 1.0) = 0.55;
+uniform float root_ao : hint_range(0.0, 1.0) = 0.35;
 uniform float backlight : hint_range(0.0, 1.0) = 0.35;
 group_uniforms wind;
 uniform vec2 wind_direction = vec2(1.0, 0.35);

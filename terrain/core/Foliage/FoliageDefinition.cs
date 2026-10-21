@@ -80,7 +80,7 @@ public sealed class FoliageMeshDefinition
     public float BladeWidth { get; set; } = 0.05f;
     /// <summary>Clump radius in metres.</summary>
     public float Radius { get; set; } = 0.3f;
-    /// <summary>Distance where the clump switches to its lighter LOD (about a third of the blades, wider).</summary>
+    /// <summary>Distance where the clump drops to a third of its blades (wider); at 3x this, a sixth.</summary>
     public float LodDistance { get; set; } = 25f;
     public bool CastShadows { get; set; } = true;
 }

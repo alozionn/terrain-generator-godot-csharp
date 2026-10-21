@@ -13,5 +13,12 @@
     { "id": "outpost", "origin": [71, 19], "cells": [6, 6],   "height": [6.0, 6.4], "blend": 6 }
   ],
   "foliage": ["temperate"],
+  // Mushrook shelters (2x2) to judge proportions on the board
+  "placements": [
+    { "id": "shelter_a", "scene": "res://assets/buildings/shelter.glb", "cell": [44, 47], "cells": [2, 2] },
+    { "id": "shelter_b", "scene": "res://assets/buildings/shelter.glb", "cell": [48, 47], "cells": [2, 2], "rotation": 90 },
+    { "id": "shelter_c", "scene": "res://assets/buildings/shelter.glb", "cell": [44, 51], "cells": [2, 2], "rotation": 180 },
+    { "id": "outpost_shelter", "scene": "res://assets/buildings/shelter.glb", "cell": [73, 21], "cells": [2, 2], "rotation": 270 }
+  ],
   "ocean": ""
 }
