@@ -36,6 +36,8 @@ public sealed class SpeciesDefinition
     public float PlayableMargin { get; set; }
     /// <summary>Scale multiplier on playable cells (e.g. shorter grass so the board stays readable).</summary>
     public float PlayableScale { get; set; } = 1f;
+    /// <summary>Fraction of instances kept on playable cells (e.g. a few tufts instead of a carpet).</summary>
+    public float PlayableDensity { get; set; } = 1f;
     public ClusterDefinition Clusters { get; set; } = new();
     public float[] Scale { get; set; } = { 0.8f, 1.2f };
     /// <summary>Random lean in degrees.</summary>

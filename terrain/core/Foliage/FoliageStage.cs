@@ -66,7 +66,11 @@ public static class FoliageStage
                         if (occupied != null && occupied[Math.Min(w.Cells - 1, (int)(z / w.CellSize)) * w.Cells + Math.Min(w.Cells - 1, (int)(x / w.CellSize))]) continue;
 
                         float scale = Lerp(sp.Scale[0], sp.Scale[^1], Unit(Seeds.Mix(h + 4)));
-                        if (sp.PlayableScale != 1f && NearPlayable(w, x, z, 0f)) scale *= sp.PlayableScale;
+                        if ((sp.PlayableScale != 1f || sp.PlayableDensity < 1f) && NearPlayable(w, x, z, 0f))
+                        {
+                            if (Unit(Seeds.Mix(h + 9)) >= sp.PlayableDensity) continue;
+                            scale *= sp.PlayableScale;
+                        }
                         float tilt = sp.Tilt * MathF.PI / 180f;
                         list.Add(new FoliageInstance(x, y, z,
                             Unit(Seeds.Mix(h + 5)) * MathF.Tau,

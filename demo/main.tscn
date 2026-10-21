@@ -1,13 +1,13 @@
-[gd_scene load_steps=7 format=3]
+[gd_scene format=3 uid="uid://bx064t7o0cb45"]
 
-[ext_resource type="Script" path="res://demo/DemoRoot.cs" id="1"]
-[ext_resource type="Script" path="res://terrain/Terrain.cs" id="2"]
+[ext_resource type="Script" uid="uid://dvspx3bpv06rp" path="res://demo/DemoRoot.cs" id="1"]
+[ext_resource type="Script" uid="uid://bjy5d5rgg6xex" path="res://terrain/Terrain.cs" id="2"]
 
 [sub_resource type="ProceduralSkyMaterial" id="sky_mat"]
 sky_top_color = Color(0.32, 0.55, 0.85, 1)
 sky_horizon_color = Color(0.72, 0.82, 0.92, 1)
-ground_horizon_color = Color(0.72, 0.82, 0.92, 1)
 ground_bottom_color = Color(0.2, 0.3, 0.45, 1)
+ground_horizon_color = Color(0.72, 0.82, 0.92, 1)
 
 [sub_resource type="Sky" id="sky"]
 sky_material = SubResource("sky_mat")
@@ -30,32 +30,32 @@ transparency = 1
 albedo_color = Color(0.16, 0.42, 0.62, 0.78)
 roughness = 0.15
 
-[node name="DemoRoot" type="Node3D"]
+[node name="DemoRoot" type="Node3D" unique_id=785137869]
 script = ExtResource("1")
 
-[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=1086230798]
 environment = SubResource("env")
 
-[node name="Sun" type="DirectionalLight3D" parent="."]
+[node name="Sun" type="DirectionalLight3D" parent="." unique_id=991996299]
 transform = Transform3D(0.707107, -0.5, 0.5, 0, 0.707107, 0.707107, -0.707107, -0.5, 0.5, 0, 50, 0)
 light_energy = 1.2
 shadow_enabled = true
 directional_shadow_max_distance = 600.0
 
-[node name="Terrain" type="Node3D" parent="."]
+[node name="Terrain" type="Node3D" parent="." unique_id=217480071]
 script = ExtResource("2")
 
-[node name="SeaPlaceholder" type="MeshInstance3D" parent="."]
+[node name="SeaPlaceholder" type="MeshInstance3D" parent="." unique_id=1350192061]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 100, 0, 100)
 mesh = SubResource("sea")
 surface_material_override/0 = SubResource("sea_mat")
 
-[node name="Camera" type="Camera3D" parent="."]
+[node name="Camera" type="Camera3D" parent="." unique_id=236530023]
 fov = 50.0
 
-[node name="Ui" type="CanvasLayer" parent="."]
+[node name="Ui" type="CanvasLayer" parent="." unique_id=1410388208]
 
-[node name="Info" type="Label" parent="Ui"]
+[node name="Info" type="Label" parent="Ui" unique_id=1298181135]
 offset_left = 12.0
 offset_top = 10.0
 offset_right = 700.0

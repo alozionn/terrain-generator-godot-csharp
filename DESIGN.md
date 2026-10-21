@@ -91,8 +91,9 @@ Bracketed stages come later.
 
 - **Sets** (`data/foliage/sets/*.json`, listed by the level): species with rules for band, height range, maximum slope, playable cells (avoid, with a margin, or allow, as grass does), cluster noise for groves and flower beds, density and spacing, scale, tilt and tint jitter.
 - **Placement** (`FoliageStage`, plain C#): a jittered grid per species, each species seeded from the world seed and its own name. Species placed earlier claim footprints that later ones avoid: rocks, then trees, then bushes, then ground cover.
-- **Meshes** (`data/foliage/meshes.json`): a res:// scene, or `procedural:`. Grass and flowers are generated blade clumps (curved tapering blades, a dense LOD0 and a sparse LOD1) with `terrain/surface/grass.gdshader`: root-to-tip gradient, rolling wind gusts, sky-bent normals, and blades that shrink to nothing before the instancer culls their cell, so the grass edge never shows. Trees, bushes and rocks are stand-ins until real models land.
-- **Board readability:** `playableScale` shortens a species on playable cells (grass at 0.6), so the grid stays visible.
+- **Meshes** (`data/foliage/meshes.json`): a res:// scene, or `procedural:`. Grass and flowers are generated blade clumps (three LODs) with `terrain/surface/grass.gdshader`: root-to-tip gradient, rolling wind gusts, sky-bent normals lit the same on both sides. Trees, bushes and rocks are single-surface stand-ins until real models land.
+- **Distance:** grass thins rather than shrinks. Each blade drops out at its own random distance (down to 30% of a clump), and each clump at its own distance beyond that, so the grass edge is a soft circle around the camera and never shows the instancer's cells.
+- **Grass scatter:** dense meadow patches from cluster noise plus sparse tufts in between; `playableDensity` and `playableScale` keep only a few tufts on the board.
 - **Rendering:** Terrain3D's instancer (LOD, visibility range, shadows).
 - **Next:** temperature map plus Voronoi regions to choose sets per area; real tree and rock models.
 - **Assets:** Quaternius Stylized Nature MegaKit; textures from Poly Haven, 3dtextures.me and freestylized (check its licence). The target look is painterly, anime, a bit Warcraft.

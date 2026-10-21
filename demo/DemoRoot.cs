@@ -39,6 +39,16 @@ public partial class DemoRoot : Node3D
             _shotPath = args[i + 1];
             _shotClock = 0;
         }
+        // perf probes: --nossao, --noshadow, --nofog, --noterrain (hides the Terrain3D node), --nodebugmenu
+        var env = GetNode<WorldEnvironment>("WorldEnvironment").Environment;
+        if (Array.IndexOf(args, "--nossao") >= 0) env.SsaoEnabled = false;
+        if (Array.IndexOf(args, "--nofog") >= 0) env.FogEnabled = false;
+        if (Array.IndexOf(args, "--noshadow") >= 0) GetNode<DirectionalLight3D>("Sun").ShadowEnabled = false;
+        if (Array.IndexOf(args, "--noterrain") >= 0 && _terrain.Renderer != null) _terrain.Renderer.Visible = false;
+        if (Array.IndexOf(args, "--nodebugmenu") >= 0) GetNodeOrNull<CanvasLayer>("/root/DebugMenu")?.Hide();
+        // --level path loads another level (e.g. a perf variant)
+        int lv = Array.IndexOf(args, "--level");
+        if (lv >= 0 && lv + 1 < args.Length) _terrain.LoadLevel(args[lv + 1]);
         // --view x,z,yaw,pitch,distance frames a shot; --nogrid hides the cell grid
         int v = Array.IndexOf(args, "--view");
         if (v >= 0 && v + 1 < args.Length)

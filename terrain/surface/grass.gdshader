@@ -15,10 +15,17 @@ uniform float wind_strength = 0.18; // metres of tip sway
 uniform float wind_speed = 1.3;
 uniform float gust_scale = 0.06; // cycles per metre of the rolling gusts
 group_uniforms shading;
-uniform float up_normal : hint_range(0.0, 1.0) = 0.7; // bend normals toward the sky so clumps read as soft masses
+uniform float up_normal : hint_range(0.0, 1.0) = 0.85; // bend normals toward the sky so clumps read as soft masses
 group_uniforms distance;
-uniform float fade_start = 35.0; // metres from the camera where blades start shrinking
-uniform float fade_end = 60.0; // fully flat here, before the instancer culls the cell (no hard edges)
+// Clumps thin out with distance instead of shrinking: each clump has its own random cut-off between these, so the
+// grass edge is a soft circle around the camera, and every clump that is drawn is drawn at full size.
+uniform float fade_start = 25.0;
+uniform float fade_end = 60.0; // none left here, before the instancer culls the cell (no hard edges)
+// Within a clump, blades drop out one by one (random cut-off per blade in vertex alpha) between these distances,
+// down to blade_min of them, on top of the instancer's coarser LOD switches.
+uniform float blade_thin_start = 6.0;
+uniform float blade_thin_end = 25.0;
+uniform float blade_min : hint_range(0.0, 1.0) = 0.3;
 group_uniforms;
 
 varying float v_height;
@@ -30,8 +37,15 @@ void vertex() {
 	v_head = step(1.5, UV.x);
 	v_tint = COLOR.rgb;
 
-	float shrink = 1.0 - smoothstep(fade_start, fade_end, distance(MODEL_MATRIX[3].xyz, CAMERA_POSITION_WORLD));
-	VERTEX.y *= shrink;
+	vec3 origin = MODEL_MATRIX[3].xyz;
+	float dist = distance(origin, CAMERA_POSITION_WORLD);
+	float keep = 1.0 - smoothstep(fade_start, fade_end, dist);
+	float blade_keep = mix(1.0, blade_min, smoothstep(blade_thin_start, blade_thin_end, dist));
+	if (COLOR.a > blade_keep) keep = 0.0;
+	float cutoff = fract(sin(dot(origin.xz, vec2(12.9898, 78.233))) * 43758.5453);
+	// a clump grows in over a short band as the camera approaches its cut-off, then stays full size
+	float shrink = clamp((keep - cutoff) * 10.0, 0.0, 1.0);
+	VERTEX *= shrink;
 	vec3 world = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
 	vec2 dir = normalize(wind_direction);
 	float gust = sin(TIME * wind_speed + dot(world.xz, dir) * gust_scale * 6.2832) * 0.5 + 0.5;
@@ -49,6 +63,7 @@ void vertex() {
 void fragment() {
 	vec3 blade = mix(root_color, tip_color, smoothstep(0.0, 1.0, v_height));
 	vec3 albedo = mix(blade, head_color, v_head) * v_tint;
+	if (!FRONT_FACING) NORMAL = -NORMAL; // light both sides of a blade the same, no dark backs
 	ALBEDO = albedo;
 	AO = mix(1.0 - root_ao, 1.0, smoothstep(0.0, 0.7, v_height));
 	AO_LIGHT_AFFECT = 0.4;

@@ -50,9 +50,7 @@ internal static class FoliageMeshes
                 break;
             case "rock":
                 var rock = new SphereMesh { Radius = 0.8f, Height = 1.1f, RadialSegments = 6, Rings = 3 };
-                var rockMesh = new ArrayMesh();
-                AddPart(rockMesh, rock, color, new Transform3D(Basis.Identity.Scaled(new Vector3(1.2f, 0.7f, 1f)), new Vector3(0, 0.15f, 0)));
-                lods.Add(rockMesh);
+                lods.Add(Merge((rock, color, new Transform3D(Basis.Identity.Scaled(new Vector3(1.2f, 0.7f, 1f)), new Vector3(0, 0.15f, 0)))));
                 break;
             default:
                 GD.PushError($"[Terrain] unknown procedural mesh '{def.Scene}'");
@@ -92,9 +90,10 @@ internal static class FoliageMeshes
             var side = new Vector3(MathF.Cos(facing), 0, MathF.Sin(facing));
             // lean away from the centre, plus some randomness
             var lean = (new Vector3(MathF.Cos(a), 0, MathF.Sin(a)) * 0.6f + new Vector3(Rand(b, 4) - 0.5f, 0, Rand(b, 5) - 0.5f)).Normalized();
-            float curve = 0.25f + 0.35f * Rand(b, 6);
-            float w = def.BladeWidth * widthScale * (0.7f + 0.6f * Rand(b, 7));
-            var shade = new Color(1, 1, 1) * (0.8f + 0.35f * Rand(b, 8));
+            float curve = 0.45f + 0.4f * Rand(b, 6); // strong lean so blades still read from a high camera
+            float w = def.BladeWidth * widthScale * (0.85f + 0.4f * Rand(b, 7));
+            float brightness = 0.9f + 0.18f * Rand(b, 8);
+            var shade = new Color(brightness, brightness, brightness, Rand(b, 9)); // alpha: the blade's distance cut-off
             var normal = lean.Cross(side).Normalized();
             if (normal.Y < 0) normal = -normal;
 
@@ -154,25 +153,42 @@ internal static class FoliageMeshes
         m.SetShaderParameter("root_color", ToColor(def.RootColor));
         m.SetShaderParameter("tip_color", ToColor(def.Color));
         m.SetShaderParameter("head_color", ToColor(def.HeadColor));
-        // flat before the instancer culls the cell, so the grass edge never shows as squares
-        m.SetShaderParameter("fade_start", def.Range * 0.6f);
-        m.SetShaderParameter("fade_end", def.Range * 0.92f);
+        // thinned out before the instancer culls the cell, so the grass edge never shows as squares
+        m.SetShaderParameter("fade_start", def.Range * 0.3f);
+        m.SetShaderParameter("fade_end", def.Range * 0.9f);
+        m.SetShaderParameter("blade_thin_start", def.LodDistance * 0.4f);
+        m.SetShaderParameter("blade_thin_end", def.Range * 0.3f);
         return m;
     }
 
     static ArrayMesh Parts(params (PrimitiveMesh shape, Color color, Vector3 position)[] parts)
     {
-        var mesh = new ArrayMesh();
-        foreach (var (shape, color, position) in parts) AddPart(mesh, shape, color, new Transform3D(Basis.Identity, position));
-        return mesh;
+        var placed = new (PrimitiveMesh, Color, Transform3D)[parts.Length];
+        for (int i = 0; i < parts.Length; i++) placed[i] = (parts[i].shape, parts[i].color, new Transform3D(Basis.Identity, parts[i].position));
+        return Merge(placed);
     }
 
-    static void AddPart(ArrayMesh into, PrimitiveMesh shape, Color color, Transform3D xf)
+    /// <summary>All parts in one surface, coloured per vertex, so a stand-in costs one draw call per pass instead of one per part.</summary>
+    static ArrayMesh Merge(params (PrimitiveMesh shape, Color color, Transform3D xf)[] parts)
     {
         var st = new SurfaceTool();
-        st.AppendFrom(shape, 0, xf);
-        st.SetMaterial(new StandardMaterial3D { AlbedoColor = color, VertexColorUseAsAlbedo = true, Roughness = 0.9f });
-        st.Commit(into);
+        st.Begin(Mesh.PrimitiveType.Triangles);
+        foreach (var (shape, color, xf) in parts)
+        {
+            var arrays = shape.GetMeshArrays();
+            var verts = arrays[(int)Mesh.ArrayType.Vertex].AsVector3Array();
+            var normals = arrays[(int)Mesh.ArrayType.Normal].AsVector3Array();
+            var indices = arrays[(int)Mesh.ArrayType.Index].AsInt32Array();
+            foreach (int i in indices)
+            {
+                st.SetColor(color);
+                st.SetNormal((xf.Basis * normals[i]).Normalized());
+                st.AddVertex(xf * verts[i]);
+            }
+        }
+        st.Index();
+        st.SetMaterial(new StandardMaterial3D { VertexColorUseAsAlbedo = true, VertexColorIsSrgb = true, Roughness = 0.9f });
+        return st.Commit();
     }
 
     static Color ToColor(string hex)
