@@ -47,14 +47,15 @@ Probe modes: `none`, `flat`, `ground`, `ground_foliage`, `t3d`, `t3d_lite`, `t3d
 Suggested order; each one stands on its own.
 
 1. **Foliage look at board distance.** Pack grass reads as sparse specks from the 30 m camera. Try the generated blade grass for dense meadows plus pack tufts for detail (data only, `data/foliage/`), and tune scales and densities.
-2. **Frame cost toward 1 ms.** Decide SSAO (about 0.5 ms on its own), try Vulkan vs D3D12 and the Mobile renderer, profile per pass (Visual Profiler, RenderDoc), smaller leaf textures, blob shadows for tree canopies.
-3. **Temperature map + Voronoi regions** that choose which foliage set grows where (forest, meadow, pond edge), instead of one set for the whole island.
-4. **Layout pass.** Move the mountain that blocks the board view, raise the island base so decor isn't all grass, add more stamps and a second layout. Consider a small painted image as a layout input.
-5. **Paths and a "nothing grows here" mask.** Painted onto the ground (dirt texture) and into foliage rules; the pack's RockPath models can line them.
-6. **Erosion stage** (runevision's mask-based filter) after Detail.
-7. **Ocean.** Bring the ocean blueprint in at y = 0 instead of the placeholder plane; optionally hand it a water-depth texture so waves calm and foam rises in the shallows.
-8. **Gameplay hook-up.** Connect Mushrook's grid and occupancy to `WorldData` / `CellAt`, building rules by band name, zones connecting (ramps, paths), packed vs scattered building spots once gameplay says which.
-9. **Bigger maps.** 500 m levels: check generation time, ground chunk LOD if needed, and re-run the perf probe (Terrain3D comparison included).
+2. **Frame cost toward 1 ms** (see DESIGN.md, "Performance budget"). Decide SSAO (about 0.5 ms on its own), try Vulkan vs D3D12 and the Mobile renderer, profile per pass (Visual Profiler, RenderDoc), smaller leaf textures, blob shadows for tree canopies.
+3. **Lighting presets and baked decor shadows** (DESIGN.md, "Lighting and shadows"): sun and mood per level, tree shadows baked into a ground texture, local re-bake when trees are cut or planted, stable foliage IDs. Fixes the leaf-shadow flicker.
+4. **Temperature map + Voronoi regions** that choose which foliage set grows where (forest, meadow, pond edge), instead of one set for the whole island.
+5. **Layout pass.** Move the mountain that blocks the board view, raise the island base so decor isn't all grass, add more stamps and a second layout. Consider a small painted image as a layout input.
+6. **Paths and a "nothing grows here" mask.** Painted onto the ground (dirt texture) and into foliage rules; the pack's RockPath models can line them.
+7. **Erosion stage** (runevision's mask-based filter) after Detail.
+8. **Ocean.** Watch the frame: if it drops to around 200–300 fps, rebuild foliage (DESIGN.md, "Performance budget"). Bring the ocean blueprint in at y = 0 instead of the placeholder plane; optionally hand it a water-depth texture so waves calm and foam rises in the shallows.
+9. **Gameplay hook-up.** Connect Mushrook's grid and occupancy to `WorldData` / `CellAt`, building rules by band name, zones connecting (ramps, paths), packed vs scattered building spots once gameplay says which.
+10. **Bigger maps.** 500 m levels: check generation time, ground chunk LOD if needed, and re-run the perf probe (Terrain3D comparison included).
 
 ## Terrain3D (dev only)
 

@@ -96,8 +96,38 @@ Our own renderer (`terrain/surface/`): at board scale (200–500 m) it costs abo
 - **Distance:** grass thins rather than shrinks. Each blade drops out at its own random distance (down to 30% of a clump), and each clump at its own distance beyond that, so the grass edge is a soft circle around the camera and never shows the instancer's cells.
 - **Grass scatter:** dense meadow patches from cluster noise plus sparse tufts in between; `playableDensity` and `playableScale` keep only a few tufts on the board.
 - **Rendering** (`FoliageInstancer`): per mesh, per 32 m chunk, one `MultiMeshInstance3D` per LOD with Godot visibility ranges.
-- **Next:** temperature map plus Voronoi regions to choose sets per area; real tree and rock models.
+- **Next:** temperature map plus Voronoi regions to choose sets per area.
 - **Assets:** Quaternius Stylized Nature MegaKit; textures from Poly Haven, 3dtextures.me and freestylized (check its licence). The target look is painterly, anime, a bit Warcraft.
+
+## Lighting and shadows (decided, not built)
+
+**The problem.** Tree shadows flicker with the camera still: hundreds of alpha-cut leaf cards, each a shadow texel or two, fluttering in the wind, so texels flip on and off every frame. Smaller shadow texels make the sparkle finer, not stable. Leaf cards in the shadow pass were also the most expensive part of it (about 0.5 ms with 4 cascades).
+
+**Lighting presets per level.** Sun direction and colour, ambient and sky colours, shadow softness and fog live in data, named by the level like a palette and overridable. Sun angle plus palette is the main mood and art-direction tool: a few angles and colours make a new-feeling level. The sun is fixed while a level is played; it changes between levels, and while tuning (the bake is fast enough to follow a slider).
+
+**Split by what can change during play:**
+
+- **Fixed decor (generated trees, rocks): baked.** A generator stage, plain C#, after foliage placement. For each ground sample, cast toward the sun against simple canopy proxies (a few squashed spheres per tree) and the heightmap, then blur a little so it reads as a soft silhouette. Milliseconds at board size. Zero per-frame cost, zero flicker, hills shadow the ground behind them for free.
+- **Anything that can change: realtime.** Player-placed buildings (nothing to bake before they exist) and terrain edits (Mushrook raises and lowers cells). Solid, opaque, not swaying, so they don't flicker. Leaf cards stop casting realtime shadows.
+- **A sun that moves during play** (time of day, a sunrise level): canopy proxy meshes cast realtime shadows instead of the bake. Same soft look, one switch per level.
+
+**Gameplay foliage and cleanup.** Cutting a tree must remove its shadow, and planting or building must add one.
+
+- The baked shadow goes in its **own texture** (ground and, optionally, grass sample it), not in vertex colours, so a change uploads one small rectangle instead of rebuilding mesh chunks.
+- Each tree's shadow covers a known box (its proxy projected along the sun, about 10–20 m). Removing or adding a tree re-bakes only that box from the trees still standing: a few hundred samples against a handful of trees, well under a millisecond. Terrain edits re-bake their area the same way.
+- **Stable foliage IDs**, derived from species and scatter grid slot, so they are identical every time the level regenerates. Gameplay uses them to pick, remove and hide instances; saves store changes ("tree 312 removed") on top of the seed.
+- A per-species **`interactive`** flag (harvestable trees, wood, later ore) gets IDs, pick shapes and removal; plain decor skips all of it.
+- Fallback if the local re-bake proves fiddly: interactive trees use realtime proxy shadows and only decor is baked. Simpler, but two shadow styles to keep matching.
+
+Also worth trying regardless: Godot's soft shadow filtering and the light's angular size (contact-hardening soft shadows) for buildings and terrain, and keeping leaf flutter out of the shadow pass while realtime leaf shadows still exist.
+
+## Performance budget
+
+The goal is a terrain-plus-foliage cost well under 1 ms of GPU at 1080p, with water still to come. Lessons so far:
+
+- A simple scene sank about 2 ms through work nobody could see: four shadow cascades of alpha-cut leaf cards, a 4096 shadow map, SSAO, per-chunk LOD swaps, foliage on every cell. Measure first (`dev/PerfProbe.cs` prints GPU time per mode), and judge by GPU time, not fps: at over 1,000 fps the engine loop and present take a large share of the frame.
+- Current: ground about 0.25 ms GPU, ground plus foliage about 0.75–0.82 ms, full demo frame 1.18–1.46 ms (SSAO about 0.5 ms of that).
+- **Tripwire:** if adding the ocean drops the full scene to around 200–300 fps, the foliage system gets rebuilt rather than tuned. Likely direction: a camera-following GPU grass field driven by a density map (grass cost no longer scales with map size or instance lists), baked decor shadows as above, opaque or alpha-to-coverage leaves, and far fewer instances overall.
 
 ## Not yet
 
