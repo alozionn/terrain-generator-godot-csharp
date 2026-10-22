@@ -73,18 +73,48 @@ public static class ErosionStage
             freq *= e.Lacunarity;
         }
 
+        // the raw pattern, relative to the starting fade target so ground with no gullies keeps its height. Crests are
+        // only partly raised (they turned 1 m sample spikes into pyramids), and the field is softened once so ridges
+        // come out rounded rather than knife-edged.
+        var delta = new float[h.Length];
+        for (int i = 0; i < h.Length; i++)
+        {
+            float d = (offset[i] - baseline[i] * total) / total;
+            delta[i] = d > 0 ? d * e.CrestLift : d;
+        }
+        delta = Soften(delta, n);
         for (int i = 0; i < h.Length; i++)
         {
             // keep the coast and anything near sea level as the layout made it
             float land = Noise.SmoothStep(valley, valley + 2f, h[i]);
             if (land <= 0) continue;
-            // relative to the starting fade target, so ground with no gully pattern keeps its height and the effect
-            // has no edge where it fades in
-            float next = h[i] + (offset[i] - baseline[i] * total) * scale * land;
+            float next = h[i] + delta[i] * total * scale * land;
             h[i] = MathF.Max(next, MathF.Min(h[i], 0.4f));
             // the same offset, normalised, is the ridge map the ground painting reads
             w.Ridge[i] = Math.Clamp((offset[i] - baseline[i] * total) / total * 1.5f, -1f, 1f) * land;
         }
+    }
+
+    /// <summary>One pass of a 3x3 binomial blur.</summary>
+    static float[] Soften(float[] f, int n)
+    {
+        var o = new float[f.Length];
+        for (int z = 0; z < n; z++)
+            for (int x = 0; x < n; x++)
+            {
+                float sum = 0, wsum = 0;
+                for (int dz = -1; dz <= 1; dz++)
+                    for (int dx = -1; dx <= 1; dx++)
+                    {
+                        int xx = x + dx, zz = z + dz;
+                        if (xx < 0 || zz < 0 || xx >= n || zz >= n) continue;
+                        float k = (dx == 0 ? 2 : 1) * (dz == 0 ? 2 : 1);
+                        sum += f[zz * n + xx] * k;
+                        wsum += k;
+                    }
+                o[z * n + x] = sum / wsum;
+            }
+        return o;
     }
 
     /// <summary>

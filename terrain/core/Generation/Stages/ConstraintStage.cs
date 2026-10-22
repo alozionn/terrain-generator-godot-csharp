@@ -32,7 +32,9 @@ public static class ConstraintStage
                     if (lo < zone.Height[0] - WindowTolerance || hi > zone.Height[1] + WindowTolerance) outside++;
                     if (zone.TouchesSea && !seaFound) seaFound = BordersSea(w, cx, cz, zi);
                 }
-            if (owned == 0) issues.Add($"zone '{zone.Id}' has no cells");
+            if (owned == 0) issues.Add($"zone '{zone.Id}' has no buildable cells");
+            else if (owned < zone.MinBuildable * zone.Cells[0] * zone.Cells[1])
+                issues.Add($"zone '{zone.Id}': only {owned} of {zone.Cells[0] * zone.Cells[1]} cells are buildable (wanted {zone.MinBuildable:P0})");
             if (outside > 0) issues.Add($"zone '{zone.Id}': {outside} of {owned} cells leave the height window [{zone.Height[0]}, {zone.Height[1]}]");
             if (zone.TouchesSea && owned > 0 && !seaFound) issues.Add($"zone '{zone.Id}' must touch the sea but no cell borders water");
         }

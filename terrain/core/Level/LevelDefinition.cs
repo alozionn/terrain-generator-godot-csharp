@@ -71,16 +71,24 @@ public sealed class ZoneDefinition
     public int[] Origin { get; set; } = { 0, 0 };
     /// <summary>Size in cells (x, z).</summary>
     public int[] Cells { get; set; } = { 1, 1 };
-    /// <summary>Target height window (min, max) in metres.</summary>
+    /// <summary>Height window (min, max) in metres: the ground is held inside it, and only cells inside it are buildable.</summary>
     public float[] Height { get; set; } = { 1.0f, 1.4f };
-    /// <summary>Metres over which the zone blends back into the surrounding terrain.</summary>
+    /// <summary>Metres over which the levelling fades back into the surrounding terrain.</summary>
     public float Blend { get; set; } = 8f;
-    /// <summary>Frequency of the zone's own gentle roll, in cycles per metre.</summary>
-    public float RollFrequency { get; set; } = 0.04f;
-    /// <summary>Corner radius in cells: corner cells outside it are not playable, and the blend follows the curve.</summary>
+    /// <summary>0..1: how strongly the ground is levelled (pulled toward its smoothed self, inside the window).</summary>
+    public float Level { get; set; } = 1f;
+    /// <summary>Metres the terrain is smoothed over before levelling: larger irons out more of its small bumps.</summary>
+    public float Smooth { get; set; } = 6f;
+    /// <summary>Steepest buildable cell, as rise over run across the cell (0.25 is about 14 degrees).</summary>
+    public float MaxSlope { get; set; } = 0.25f;
+    /// <summary>Corner radius in cells.</summary>
     public float Corner { get; set; }
-    /// <summary>Constraint: at least one cell must border water.</summary>
+    /// <summary>Metres the area's outline wanders in and out, so it doesn't read as a rectangle.</summary>
+    public float Ragged { get; set; }
+    /// <summary>Constraint: at least one cell must border water. A sea zone never lifts water; its cells stop at the shore.</summary>
     public bool TouchesSea { get; set; }
+    /// <summary>Constraint: at least this fraction of the area's cells must come out buildable.</summary>
+    public float MinBuildable { get; set; } = 0.5f;
 }
 
 /// <summary>
@@ -136,6 +144,8 @@ public sealed class ErosionDefinition
     public float SlopeStart { get; set; } = 0.2f;
     /// <summary>Slope (rise over run) treated as fully steep for the gully mask.</summary>
     public float AssumedSlope { get; set; } = 0.6f;
+    /// <summary>0..1: how much gully crests are raised (troughs are always carved in full); low keeps ridges rounded.</summary>
+    public float CrestLift { get; set; } = 0.35f;
     /// <summary>Phacelle cell size in wavelengths.</summary>
     public float CellScale { get; set; } = 1f;
     /// <summary>Altitude treated as valley floor (fade target -1); land below it is left alone.</summary>

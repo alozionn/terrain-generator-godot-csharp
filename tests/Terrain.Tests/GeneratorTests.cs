@@ -65,10 +65,11 @@ public class GeneratorTests
                 if (w.CellZone[cz * w.Cells + cx] != 0) continue; // rounded corners
                 cells++;
                 var (lo, hi) = w.CellRange(cx, cz);
-                await Assert.That(lo).IsGreaterThanOrEqualTo(village.Height[0] - 1e-4f);
-                await Assert.That(hi).IsLessThanOrEqualTo(village.Height[1] + 1e-4f);
+                await Assert.That(lo).IsGreaterThanOrEqualTo(village.Height[0] - ConstraintStage.WindowTolerance - 1e-4f);
+                await Assert.That(hi).IsLessThanOrEqualTo(village.Height[1] + ConstraintStage.WindowTolerance + 1e-4f);
+                await Assert.That((hi - lo) / w.CellSize).IsLessThanOrEqualTo(village.MaxSlope + 1e-4f);
             }
-        await Assert.That(cells).IsGreaterThan(village.Cells[0] * village.Cells[1] * 9 / 10);
+        await Assert.That(cells).IsGreaterThan(village.Cells[0] * village.Cells[1] * 3 / 4);
         await Assert.That(w.IsPlayable(0, 0)).IsFalse();
     }
 
@@ -81,8 +82,25 @@ public class GeneratorTests
         int x0 = village.Origin[0], z0 = village.Origin[1], x1 = x0 + village.Cells[0] - 1, z1 = z0 + village.Cells[1] - 1;
         foreach (var (cx, cz) in new[] { (x0, z0), (x1, z0), (x0, z1), (x1, z1) })
             await Assert.That(w.IsPlayable(cx, cz)).IsFalse();
-        // edge middles and the centre stay
-        await Assert.That(w.IsPlayable(x0, (z0 + z1) / 2) && w.IsPlayable((x0 + x1) / 2, z0) && w.IsPlayable((x0 + x1) / 2, (z0 + z1) / 2)).IsTrue();
+        await Assert.That(w.IsPlayable((x0 + x1) / 2, (z0 + z1) / 2)).IsTrue();
+    }
+
+    [Test]
+    public async Task SteepCellsAreNotBuildable()
+    {
+        // a ramp too steep for the zone's slope limit even after levelling into a wide window
+        var level = new LevelDefinition { Size = 60, Layout = "x", Palette = "x", Zones = { new ZoneDefinition { Id = "z", Origin = [5, 5], Cells = [20, 20], Height = [-50, 50], Level = 0, MaxSlope = 0.25f } } };
+        var layout = new LayoutDefinition { Falloff = new FalloffDefinition { Kind = FalloffKind.None, LandHeight = 1 }, Detail = new DetailDefinition { Amplitude = 0 } };
+        layout.Stamps.Add(new StampDefinition { Type = StampKind.Mountain, At = [0.5f, 0.5f], Radius = 25, Height = 20 });
+        var w = LevelGenerator.Generate(level, layout, new PaletteDefinition()).World;
+        int steep = 0;
+        for (int cz = 5; cz < 25; cz++)
+            for (int cx = 5; cx < 25; cx++)
+            {
+                var (lo, hi) = w.CellRange(cx, cz);
+                if ((hi - lo) / w.CellSize > 0.25f) { steep++; await Assert.That(w.IsPlayable(cx, cz)).IsFalse(); }
+            }
+        await Assert.That(steep).IsGreaterThan(0);
     }
 
     [Test]
