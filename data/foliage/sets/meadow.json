@@ -1,0 +1,35 @@
+{
+  "version": 1,
+  "id": "meadow",
+  // open grassland: tall grass in drifts, flower beds, the odd oak and bush. Warm and middling wet.
+  "climate": { "temperature": [0.45, 0.85], "moisture": [0.25, 0.62] },
+  "ground": { "bands": ["grass", "meadow", "hill"], "tint": "#f4ffe0", "patches": "dirt",
+              "patchAmount": 0.6, "patchFrequency": 0.05, "patchThreshold": 0.45 },
+  "species": [
+    { "id": "oaks", "meshes": ["tree_common_1", "tree_common_2", "tree_common_3", "tree_common_4", "tree_common_5"],
+      "density": 0.8, "spacing": 8, "footprint": 3, "bands": ["grass", "meadow", "hill"], "height": [1.2, 8], "maxSlope": 25,
+      "playableMargin": 3, "scale": [0.8, 1.15], "tilt": 3, "tintJitter": 0.08 },
+    { "id": "bushes", "meshes": ["bush", "bush", "bush_flowers"], "density": 2, "spacing": 3, "footprint": 1,
+      "bands": ["grass", "meadow", "hill"], "height": [1.0, 8], "maxSlope": 30, "playableMargin": 1,
+      "scale": [0.7, 1.2], "tintJitter": 0.08, "clusters": { "frequency": 0.04, "threshold": 0.0, "softness": 0.3 } },
+    // tall grass in drifts; only a few short tufts on the board so the grid stays readable
+    { "id": "tall_grass", "mesh": "grass_tall", "density": 240, "spacing": 0.6,
+      "bands": ["grass", "meadow", "hill"], "height": [1.0, 9], "maxSlope": 35, "avoidPlayable": false,
+      "playableDensity": 0.06, "playableScale": 0.5, "playableFade": 6, "scale": [0.8, 1.2], "tilt": 8, "tintJitter": 0.1,
+      "clusters": { "frequency": 0.03, "threshold": -0.15, "softness": 0.4 }, "cover": "#86a83e", "coverArea": 0.35 },
+    { "id": "gold_beds", "mesh": "flowers_gold", "density": 200, "spacing": 0.65,
+      "bands": ["grass", "meadow"], "height": [1.0, 6], "maxSlope": 25, "playableMargin": 1,
+      "scale": [0.8, 1.2], "tilt": 6, "tintJitter": 0.08,
+      "clusters": { "frequency": 0.045, "threshold": 0.3, "softness": 0.15 }, "cover": "#c99a2e", "coverArea": 0.3 },
+    { "id": "white_beds", "mesh": "flowers_white", "density": 160, "spacing": 0.7,
+      "bands": ["grass", "meadow"], "height": [1.0, 6], "maxSlope": 25, "playableMargin": 1,
+      "scale": [0.8, 1.1], "tilt": 6, "tintJitter": 0.08,
+      "clusters": { "frequency": 0.06, "threshold": 0.35, "softness": 0.15 }, "cover": "#c8d0b0", "coverArea": 0.25 },
+    { "id": "short_grass", "mesh": "grass_short", "density": 220, "spacing": 0.5,
+      "bands": ["grass", "meadow", "hill"], "height": [1.0, 9], "maxSlope": 35, "avoidPlayable": false,
+      "playableDensity": 0.6, "playableScale": 0.8, "scale": [0.8, 1.2], "tilt": 8, "tintJitter": 0.1 },
+    { "id": "clover", "meshes": ["clover_1", "clover_2"], "density": 8, "spacing": 1.0,
+      "bands": ["grass", "meadow"], "height": [1.0, 4], "maxSlope": 25, "avoidPlayable": false, "playableDensity": 0.4,
+      "scale": [0.6, 1.0], "clusters": { "frequency": 0.1, "threshold": 0.25, "softness": 0.2 } }
+  ]
+}

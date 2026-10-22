@@ -23,6 +23,10 @@ public sealed class WorldData
         Band = new byte[samples * samples];
         CellZone = new short[Cells * Cells];
         Array.Fill(CellZone, (short)-1);
+        Temperature = new float[samples * samples];
+        Moisture = new float[samples * samples];
+        Region = new short[samples * samples];
+        Ridge = new float[samples * samples];
     }
 
     /// <summary>Samples per side.</summary>
@@ -44,6 +48,36 @@ public sealed class WorldData
     public short[] CellZone { get; }
     public string[] ZoneIds { get; set; } = Array.Empty<string>();
     public string[] BandNames { get; set; } = Array.Empty<string>();
+
+    /// <summary>Erosion ridge map per sample: +1 on gully crests, -1 in creases, 0 where nothing was eroded.</summary>
+    public float[] Ridge { get; }
+    /// <summary>0 cold .. 1 hot, per sample.</summary>
+    public float[] Temperature { get; }
+    /// <summary>0 dry .. 1 wet, per sample.</summary>
+    public float[] Moisture { get; }
+    /// <summary>Voronoi region per sample.</summary>
+    public short[] Region { get; }
+    /// <summary>Region centres in metres (before warping).</summary>
+    public (float x, float z)[] RegionCentres { get; set; } = Array.Empty<(float, float)>();
+    /// <summary>Metres over which neighbouring regions' foliage interleaves.</summary>
+    public float RegionBlend { get; set; }
+    /// <summary>Mean temperature and moisture of each region's land, or NaN for a region with no land.</summary>
+    public (float temperature, float moisture)[] RegionClimate { get; set; } = Array.Empty<(float, float)>();
+    /// <summary>Index into <see cref="BiomeIds"/> per region, -1 for none.</summary>
+    public short[] RegionBiome { get; set; } = Array.Empty<short>();
+    /// <summary>Regional foliage set ids, in the level's order.</summary>
+    public string[] BiomeIds { get; set; } = Array.Empty<string>();
+
+    /// <summary>Biome at a sample, -1 for none.</summary>
+    public int BiomeAt(int x, int z)
+    {
+        int r = Region[z * Samples + x];
+        return r >= 0 && r < RegionBiome.Length ? RegionBiome[r] : -1;
+    }
+
+    /// <summary>Biome at a position in metres (nearest sample, clamped to the map).</summary>
+    public int BiomeAt(float xm, float zm) =>
+        BiomeAt(Math.Clamp((int)MathF.Round(xm / SampleSpacing), 0, Samples - 1), Math.Clamp((int)MathF.Round(zm / SampleSpacing), 0, Samples - 1));
 
     public int Index(int x, int z) => z * Samples + x;
     public float H(int x, int z) => Height[z * Samples + x];

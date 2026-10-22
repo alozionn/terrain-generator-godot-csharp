@@ -8,16 +8,23 @@
   "sampleSpacing": 1.0,
   "cellSize": 2.0,
   "zones": [
-    { "id": "village", "origin": [35, 38], "cells": [30, 30], "height": [1.0, 1.4] },
-    { "id": "port",    "origin": [40, 74], "cells": [20, 5],  "height": [0.1, 0.3], "blend": 4, "touchesSea": true },
+    { "id": "village", "origin": [43, 37], "cells": [30, 30], "height": [1.0, 1.4], "corner": 4, "blend": 10 },
+    // the port sits on the south-east coast, a short ramp down from the board's corner
+    { "id": "port",    "origin": [76, 64], "cells": [10, 8],   "height": [0.1, 0.3], "corner": 3, "blend": 6, "touchesSea": true },
     { "id": "outpost", "origin": [71, 19], "cells": [6, 6],   "height": [6.0, 6.4], "blend": 6 }
   ],
-  "foliage": ["temperate"],
+  // regional sets (with a climate) each take the Voronoi regions whose climate suits them; "ground" grows everywhere
+  "foliage": ["ground", "meadow", "forest", "pinewood", "heath"],
+  // warmer to the south-east, cooler up the mountains in the north, wetter along the coast
+  "climate": { "temperature": 0.56, "gradient": [0.3, 0.2], "lapse": 0.035, "moisture": 0.42, "coast": 0.2, "coastReach": 25,
+               "noise": 0.12, "moistureNoise": 0.3, "frequency": 0.014 },
+  "regions": { "size": 36, "warp": 20, "blend": 9 },
+  "lighting": "default",
   // Mushrook shelters (2x2) to judge proportions on the board
   "placements": [
-    { "id": "shelter_a", "scene": "res://assets/buildings/shelter.glb", "cell": [44, 47], "cells": [2, 2] },
-    { "id": "shelter_b", "scene": "res://assets/buildings/shelter.glb", "cell": [48, 47], "cells": [2, 2], "rotation": 90 },
-    { "id": "shelter_c", "scene": "res://assets/buildings/shelter.glb", "cell": [44, 51], "cells": [2, 2], "rotation": 180 },
+    { "id": "shelter_a", "scene": "res://assets/buildings/shelter.glb", "cell": [54, 47], "cells": [2, 2] },
+    { "id": "shelter_b", "scene": "res://assets/buildings/shelter.glb", "cell": [58, 47], "cells": [2, 2], "rotation": 90 },
+    { "id": "shelter_c", "scene": "res://assets/buildings/shelter.glb", "cell": [54, 51], "cells": [2, 2], "rotation": 180 },
     { "id": "outpost_shelter", "scene": "res://assets/buildings/shelter.glb", "cell": [73, 21], "cells": [2, 2], "rotation": 270 }
   ],
   "ocean": ""

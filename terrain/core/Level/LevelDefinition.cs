@@ -22,6 +22,45 @@ public sealed class LevelDefinition
     public List<PlacementDefinition> Placements { get; set; } = new();
     /// <summary>Optional ocean preset id; empty means no ocean.</summary>
     public string Ocean { get; set; } = "";
+    /// <summary>Lighting preset id (data/lighting/*.json): sun, sky and fog. Empty uses "default".</summary>
+    public string Lighting { get; set; } = "";
+    /// <summary>Temperature and moisture over the map; regional foliage sets pick their regions by them.</summary>
+    public ClimateDefinition Climate { get; set; } = new();
+    public RegionsDefinition Regions { get; set; } = new();
+}
+
+/// <summary>
+/// Temperature and moisture, both 0..1 (cold..hot, dry..wet). Temperature: a base, a gradient across the map, cooler
+/// with height, plus slow noise. Moisture: a base, wetter near the coast, plus its own noise.
+/// </summary>
+public sealed class ClimateDefinition
+{
+    public float Temperature { get; set; } = 0.55f;
+    /// <summary>Change from the map's west to east edge (x) and north to south edge (z).</summary>
+    public float[] Gradient { get; set; } = { 0f, 0f };
+    /// <summary>Temperature lost per metre above sea level.</summary>
+    public float Lapse { get; set; } = 0.025f;
+    public float Moisture { get; set; } = 0.45f;
+    /// <summary>Moisture added at the shoreline, fading out over <see cref="CoastReach"/> metres inland.</summary>
+    public float Coast { get; set; } = 0.25f;
+    public float CoastReach { get; set; } = 30f;
+    /// <summary>Roughly ± how far slow noise moves temperature, 0..1.</summary>
+    public float Noise { get; set; } = 0.12f;
+    /// <summary>Roughly ± how far slow noise moves moisture, 0..1.</summary>
+    public float MoistureNoise { get; set; } = 0.25f;
+    /// <summary>Noise cycles per metre (both).</summary>
+    public float Frequency { get; set; } = 0.012f;
+}
+
+/// <summary>Voronoi regions: the land is split into cells, and each region takes one regional foliage set.</summary>
+public sealed class RegionsDefinition
+{
+    /// <summary>Typical distance between region centres, metres.</summary>
+    public float Size { get; set; } = 40f;
+    /// <summary>Domain warp in metres, so borders wander instead of running straight.</summary>
+    public float Warp { get; set; } = 12f;
+    /// <summary>Width in metres over which neighbouring regions' foliage interleaves.</summary>
+    public float Blend { get; set; } = 6f;
 }
 
 /// <summary>A playable rectangle of cells whose ground is pulled into a height window.</summary>
@@ -38,6 +77,8 @@ public sealed class ZoneDefinition
     public float Blend { get; set; } = 8f;
     /// <summary>Frequency of the zone's own gentle roll, in cycles per metre.</summary>
     public float RollFrequency { get; set; } = 0.04f;
+    /// <summary>Corner radius in cells: corner cells outside it are not playable, and the blend follows the curve.</summary>
+    public float Corner { get; set; }
     /// <summary>Constraint: at least one cell must border water.</summary>
     public bool TouchesSea { get; set; }
 }
@@ -71,6 +112,36 @@ public sealed class LayoutDefinition
     public FalloffDefinition Falloff { get; set; } = new();
     public List<StampDefinition> Stamps { get; set; } = new();
     public DetailDefinition Detail { get; set; } = new();
+    /// <summary>Gullies carved down slopes after the detail noise; off unless a strength is given.</summary>
+    public ErosionDefinition Erosion { get; set; } = new();
+}
+
+/// <summary>Erosion filter settings (see ErosionStage); names follow runevision's article.</summary>
+public sealed class ErosionDefinition
+{
+    /// <summary>Overall height of the effect in metres; 0 switches erosion off.</summary>
+    public float Strength { get; set; }
+    /// <summary>Share of the strength that goes into gully shapes (the rest sharpens peaks and deepens valleys).</summary>
+    public float GullyWeight { get; set; } = 0.5f;
+    /// <summary>Coarsest gullies per metre across the slope.</summary>
+    public float Frequency { get; set; } = 0.04f;
+    public int Octaves { get; set; } = 5;
+    /// <summary>Amplitude kept per finer octave.</summary>
+    public float Gain { get; set; } = 0.5f;
+    /// <summary>Frequency multiplier per octave.</summary>
+    public float Lacunarity { get; set; } = 2f;
+    /// <summary>How far finer gullies spread from the steepest parts of coarser ones; lower confines them.</summary>
+    public float Detail { get; set; } = 1.5f;
+    /// <summary>Slope (rise over run) below which there are no gullies, so gentle rolls stay smooth.</summary>
+    public float SlopeStart { get; set; } = 0.2f;
+    /// <summary>Slope (rise over run) treated as fully steep for the gully mask.</summary>
+    public float AssumedSlope { get; set; } = 0.6f;
+    /// <summary>Phacelle cell size in wavelengths.</summary>
+    public float CellScale { get; set; } = 1f;
+    /// <summary>Altitude treated as valley floor (fade target -1); land below it is left alone.</summary>
+    public float ValleyHeight { get; set; } = 1f;
+    /// <summary>Altitude treated as peak (fade target +1); 0 uses the highest point of the map.</summary>
+    public float PeakHeight { get; set; }
 }
 
 public enum FalloffKind { Island, None }
@@ -120,6 +191,26 @@ public sealed class PaletteDefinition
     public CliffDefinition Cliff { get; set; } = new();
     /// <summary>Large-scale brightness/hue drift so ground doesn't look flat from far away.</summary>
     public MacroDefinition Macro { get; set; } = new();
+    /// <summary>How eroded ground is painted from the erosion ridge map.</summary>
+    public ErosionPaintDefinition Erosion { get; set; } = new();
+}
+
+/// <summary>
+/// Painting from the erosion ridge map: crests turn toward the cliff texture (bare rock), creases toward a scree or
+/// soil texture, and the tint lightens crests and darkens creases so the gullies read even from far away.
+/// </summary>
+public sealed class ErosionPaintDefinition
+{
+    /// <summary>How strongly crests become cliff rock, 0..2.</summary>
+    public float CrestRock { get; set; } = 1.2f;
+    /// <summary>How strongly creases lose cliff rock, 0..2.</summary>
+    public float CreaseSoften { get; set; } = 0.8f;
+    /// <summary>Ground texture id that collects in creases (scree, soil); empty for none.</summary>
+    public string Crease { get; set; } = "";
+    /// <summary>Most the crease texture shows, 0..1.</summary>
+    public float CreaseAmount { get; set; } = 0.7f;
+    /// <summary>± brightness from the ridge map, 0..1.</summary>
+    public float Shade { get; set; } = 0.18f;
 }
 
 public sealed class BandDefinition

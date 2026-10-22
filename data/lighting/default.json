@@ -1,0 +1,9 @@
+{
+  "version": 1,
+  "id": "default",
+  // late morning: sun from the south-east, clear sky
+  "sun": { "yaw": 45, "elevation": 45, "color": "#fff4e0", "energy": 1.2, "angularSize": 1.0 },
+  "sky": { "top": "#528ad9", "horizon": "#b8d1eb", "ambientEnergy": 1.0 },
+  "fog": { "color": "#b3cce6", "density": 0.0003 },
+  "bake": { "texel": 0.5, "blur": 1, "strength": 1.0 }
+}

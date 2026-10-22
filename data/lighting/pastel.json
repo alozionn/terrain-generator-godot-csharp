@@ -1,0 +1,9 @@
+{
+  "version": 1,
+  "id": "pastel",
+  // soft pastel sunset (Screaming Brain Studios "Cloudy Skyboxes" 07)
+  "sun": { "yaw": 120, "elevation": 21.6, "color": "#ffd9bf", "energy": 1.5, "angularSize": 2.0 },
+  "sky": { "panorama": "res://assets/skies/sbs_cloudy_sky_07.png", "sunAzimuth": 89.5, "energy": 1.0, "ambientEnergy": 1.0 },
+  "fog": { "color": "#d8c8d8", "density": 0.0005 },
+  "bake": { "texel": 0.5, "blur": 1, "strength": 1.0 }
+}

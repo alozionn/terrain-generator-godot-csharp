@@ -1,0 +1,30 @@
+{
+  "version": 1,
+  "id": "forest",
+  // broadleaf woods: oak groves over ferns, plants and leaf litter, mushrooms in the shade. Mild and wet.
+  "climate": { "temperature": [0.3, 0.75], "moisture": [0.48, 1.0] },
+  "ground": { "bands": ["grass", "meadow", "hill"], "tint": "#c4d4a0", "patches": "litter",
+              "patchAmount": 0.85, "patchFrequency": 0.07, "patchThreshold": -0.05 },
+  "species": [
+    { "id": "oaks", "meshes": ["tree_common_1", "tree_common_2", "tree_common_3", "tree_common_4", "tree_common_5"],
+      "density": 9, "spacing": 4, "footprint": 2.6, "bands": ["grass", "meadow", "hill"], "height": [1.2, 9], "maxSlope": 28,
+      "playableMargin": 3, "scale": [0.8, 1.2], "tilt": 3, "tintJitter": 0.08,
+      "clusters": { "frequency": 0.03, "threshold": -0.35, "softness": 0.3 } },
+    { "id": "bushes", "meshes": ["bush", "bush", "bush_flowers"], "density": 5, "spacing": 2.5, "footprint": 1,
+      "bands": ["grass", "meadow", "hill"], "height": [1.0, 9], "maxSlope": 30, "playableMargin": 1,
+      "scale": [0.7, 1.2], "tintJitter": 0.08, "clusters": { "frequency": 0.05, "threshold": -0.1, "softness": 0.3 } },
+    { "id": "ferns", "meshes": ["fern", "fern", "plant_1", "plant_7"], "density": 14, "spacing": 1.4,
+      "bands": ["grass", "meadow", "hill"], "height": [1.0, 9], "maxSlope": 32, "playableMargin": 1,
+      "scale": [0.3, 0.5], "tintJitter": 0.08, "clusters": { "frequency": 0.06, "threshold": -0.1, "softness": 0.3 } },
+    { "id": "mushrooms", "meshes": ["mushroom_1", "mushroom_2"], "density": 5, "spacing": 1.5,
+      "bands": ["grass", "meadow", "hill"], "height": [1.0, 9], "maxSlope": 30, "playableMargin": 1,
+      "scale": [0.6, 1.0], "tintJitter": 0.1, "clusters": { "frequency": 0.12, "threshold": 0.1, "softness": 0.2 } },
+    { "id": "violets", "mesh": "flowers_violet", "density": 60, "spacing": 0.8,
+      "bands": ["grass", "meadow", "hill"], "height": [1.0, 8], "maxSlope": 25, "playableMargin": 1,
+      "scale": [0.8, 1.1], "tilt": 6, "clusters": { "frequency": 0.07, "threshold": 0.4, "softness": 0.15 } },
+    { "id": "forest_grass", "mesh": "grass_forest", "density": 120, "spacing": 0.6,
+      "bands": ["grass", "meadow", "hill"], "height": [1.0, 9], "maxSlope": 35, "avoidPlayable": false,
+      "playableDensity": 0.5, "playableScale": 0.8, "scale": [0.8, 1.2], "tilt": 8, "tintJitter": 0.1,
+      "clusters": { "frequency": 0.05, "threshold": -0.3, "softness": 0.4 }, "cover": "#5f7f32", "coverArea": 0.3 }
+  ]
+}

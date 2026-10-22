@@ -86,7 +86,7 @@ internal sealed class Terrain3DBridge
             for (int i = 0; i < list.Count; i++)
             {
                 var f = list[i];
-                var basis = new Basis(Vector3.Up, f.Yaw) * Basis.FromEuler(new Vector3(f.TiltX, 0, f.TiltZ));
+                var basis = Basis.FromEuler(new Vector3(f.TiltX, 0, f.TiltZ)) * new Basis(Vector3.Up, f.Yaw);
                 transforms.Add(new Transform3D(basis.Scaled(Vector3.One * f.Scale), new Vector3(f.X, f.Y, f.Z)));
                 colors[i] = new Color(f.Tint, f.Tint, f.Tint);
             }

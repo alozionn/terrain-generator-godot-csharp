@@ -13,5 +13,7 @@
     { "name": "snow",   "from": 13.0, "color": "#f4eefa", "tex": "rock", "tint": "#ffffff" }
   ],
   "cliff": { "tex": "rock", "tint": "#c8c0e0", "slopeStart": 32, "slopeFull": 48 },
-  "macro": { "amount": 0.15, "frequency": 0.015 }
+  "macro": { "amount": 0.15, "frequency": 0.015 },
+  // erosion ridge map: rock on gully crests, pebbly soil down the creases
+  "erosion": { "crestRock": 1.2, "creaseSoften": 0.8, "crease": "dry", "creaseAmount": 0.75, "shade": 0.18 }
 }

@@ -58,6 +58,42 @@ public static class StageImages
         return bands;
     }
 
+    /// <summary>Grey hillshade with a low light from the north-west, so landforms (and erosion gullies) stand out.</summary>
+    public static Rgb Hillshade(WorldData w, int scale) =>
+        Draw(w, scale, (x, z) => w.H(x, z) < 0 ? Sea : new Vector3(MathF.Pow(Shade(w, x, z), 2.2f)));
+
+    /// <summary>Temperature over land, blue (cold) to red (hot), with hillshade.</summary>
+    public static Rgb Temperature(WorldData w, int scale) =>
+        Draw(w, scale, (x, z) => w.H(x, z) < 0 ? Sea : Vector3.Lerp(new Vector3(0.2f, 0.4f, 0.95f), new Vector3(0.95f, 0.3f, 0.15f), w.Temperature[w.Index(x, z)]) * Shade(w, x, z));
+
+    /// <summary>Moisture over land, sand (dry) to teal (wet), with hillshade.</summary>
+    public static Rgb Moisture(WorldData w, int scale) =>
+        Draw(w, scale, (x, z) => w.H(x, z) < 0 ? Sea : Vector3.Lerp(new Vector3(0.9f, 0.8f, 0.5f), new Vector3(0.1f, 0.55f, 0.55f), w.Moisture[w.Index(x, z)]) * Shade(w, x, z));
+
+    /// <summary>One colour per biome over land, region borders darkened, hillshade.</summary>
+    public static Rgb Biomes(WorldData w, int scale) =>
+        Draw(w, scale, (x, z) =>
+        {
+            if (w.H(x, z) < 0) return Sea;
+            int b = w.BiomeAt(x, z);
+            var c = b < 0 ? new Vector3(0.5f) : BiomeColor(w.BiomeIds[b]);
+            int r = w.Region[w.Index(x, z)];
+            bool border = (x + 1 < w.Samples && w.Region[w.Index(x + 1, z)] != r) || (z + 1 < w.Samples && w.Region[w.Index(x, z + 1)] != r);
+            return c * Shade(w, x, z) * (border ? 0.6f : 1f);
+        });
+
+    static readonly Vector3 Sea = new(0.15f, 0.3f, 0.55f);
+
+    /// <summary>A stable, saturated colour per biome id.</summary>
+    public static Vector3 BiomeColor(string id)
+    {
+        uint h = 2166136261u;
+        foreach (char ch in id) { h ^= ch; h *= 16777619u; }
+        float hue = (h % 360) / 60f;
+        float k(float n) { float v = (n + hue) % 6; return 1f - 0.6f * MathF.Max(0f, MathF.Min(MathF.Min(v, 4 - v), 1f)); }
+        return new Vector3(k(5), k(3), k(1));
+    }
+
     static Vector3 ZoneTint(int zone) => (zone % 4) switch
     {
         0 => new Vector3(1f, 0.9f, 0.3f),

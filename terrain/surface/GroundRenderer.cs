@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Godot;
+using Terrain.Core.Foliage;
 using Terrain.Core.Ground;
 using Terrain.Core.World;
 
@@ -22,7 +23,8 @@ internal sealed class GroundRenderer
     /// <summary>Quads per chunk side.</summary>
     public int ChunkQuads { get; set; } = 64;
 
-    public void Build(WorldData w, GroundMaps g, GroundTextures textures)
+    /// <param name="foliage">Cover colours painted under ground cover (CUSTOM2); null for none.</param>
+    public void Build(WorldData w, GroundMaps g, GroundTextures textures, FoliageResult foliage = null)
     {
         foreach (var c in _chunks) c.QueueFree();
         _chunks.Clear();
@@ -41,7 +43,7 @@ internal sealed class GroundRenderer
                 var chunk = new MeshInstance3D
                 {
                     Name = $"Ground_{x0 / ChunkQuads}_{z0 / ChunkQuads}",
-                    Mesh = Chunk(w, g, weights, x0, z0, nx, nz),
+                    Mesh = Chunk(w, g, weights, foliage, x0, z0, nx, nz),
                     MaterialOverride = _material,
                     Layers = 1, // zone-grid decals project onto layer 1 only
                 };
@@ -80,7 +82,9 @@ internal sealed class GroundRenderer
         }
     }
 
-    static ArrayMesh Chunk(WorldData w, GroundMaps g, byte[] weights, int x0, int z0, int nx, int nz)
+    static byte ToByte(float v) => (byte)Math.Clamp((int)MathF.Round(v * 255f), 0, 255);
+
+    static ArrayMesh Chunk(WorldData w, GroundMaps g, byte[] weights, FoliageResult foliage, int x0, int z0, int nx, int nz)
     {
         int vx = nx + 1, vz = nz + 1, n = vx * vz;
         var verts = new Vector3[n];
@@ -89,6 +93,8 @@ internal sealed class GroundRenderer
         var colors = new Color[n];
         var custom0 = new byte[n * 4];
         var custom1 = new byte[n * 4];
+        var custom2 = new byte[n * 4];
+        bool hasCover = foliage is { CoverAmount.Length: > 0 };
         for (int z = 0; z < vz; z++)
             for (int x = 0; x < vx; x++)
             {
@@ -105,6 +111,12 @@ internal sealed class GroundRenderer
                 colors[v] = new Color(tint.X, tint.Y, tint.Z).SrgbToLinear();
                 Array.Copy(weights, s * 8, custom0, v * 4, 4);
                 Array.Copy(weights, s * 8 + 4, custom1, v * 4, 4);
+                if (hasCover)
+                {
+                    var c = foliage.CoverColor[s];
+                    custom2[v * 4] = ToByte(c.X); custom2[v * 4 + 1] = ToByte(c.Y); custom2[v * 4 + 2] = ToByte(c.Z);
+                    custom2[v * 4 + 3] = ToByte(foliage.CoverAmount[s]);
+                }
             }
 
         var indices = new int[nx * nz * 6];
@@ -128,9 +140,11 @@ internal sealed class GroundRenderer
         arrays[(int)Mesh.ArrayType.Color] = colors;
         arrays[(int)Mesh.ArrayType.Custom0] = custom0;
         arrays[(int)Mesh.ArrayType.Custom1] = custom1;
+        arrays[(int)Mesh.ArrayType.Custom2] = custom2;
         arrays[(int)Mesh.ArrayType.Index] = indices;
         var format = (Mesh.ArrayFormat)((int)Mesh.ArrayCustomFormat.Rgba8Unorm << (int)Mesh.ArrayFormat.FormatCustom0Shift)
-                   | (Mesh.ArrayFormat)((int)Mesh.ArrayCustomFormat.Rgba8Unorm << (int)Mesh.ArrayFormat.FormatCustom1Shift);
+                   | (Mesh.ArrayFormat)((int)Mesh.ArrayCustomFormat.Rgba8Unorm << (int)Mesh.ArrayFormat.FormatCustom1Shift)
+                   | (Mesh.ArrayFormat)((int)Mesh.ArrayCustomFormat.Rgba8Unorm << (int)Mesh.ArrayFormat.FormatCustom2Shift);
         var mesh = new ArrayMesh();
         mesh.AddSurfaceFromArrays(Mesh.PrimitiveType.Triangles, arrays, null, null, format);
         return mesh;

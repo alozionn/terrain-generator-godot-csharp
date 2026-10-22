@@ -58,15 +58,31 @@ public class GeneratorTests
         var (level, layout, palette) = Sample();
         var w = LevelGenerator.Generate(level, layout, palette).World;
         var village = level.Zones[0];
+        int cells = 0;
         for (int cz = village.Origin[1]; cz < village.Origin[1] + village.Cells[1]; cz++)
             for (int cx = village.Origin[0]; cx < village.Origin[0] + village.Cells[0]; cx++)
             {
+                if (w.CellZone[cz * w.Cells + cx] != 0) continue; // rounded corners
+                cells++;
                 var (lo, hi) = w.CellRange(cx, cz);
                 await Assert.That(lo).IsGreaterThanOrEqualTo(village.Height[0] - 1e-4f);
                 await Assert.That(hi).IsLessThanOrEqualTo(village.Height[1] + 1e-4f);
-                await Assert.That(w.IsPlayable(cx, cz)).IsTrue();
             }
+        await Assert.That(cells).IsGreaterThan(village.Cells[0] * village.Cells[1] * 9 / 10);
         await Assert.That(w.IsPlayable(0, 0)).IsFalse();
+    }
+
+    [Test]
+    public async Task RoundedZonesLoseTheirCornerCells()
+    {
+        var (level, layout, palette) = Sample();
+        var w = LevelGenerator.Generate(level, layout, palette).World;
+        var village = level.Zones[0];
+        int x0 = village.Origin[0], z0 = village.Origin[1], x1 = x0 + village.Cells[0] - 1, z1 = z0 + village.Cells[1] - 1;
+        foreach (var (cx, cz) in new[] { (x0, z0), (x1, z0), (x0, z1), (x1, z1) })
+            await Assert.That(w.IsPlayable(cx, cz)).IsFalse();
+        // edge middles and the centre stay
+        await Assert.That(w.IsPlayable(x0, (z0 + z1) / 2) && w.IsPlayable((x0 + x1) / 2, z0) && w.IsPlayable((x0 + x1) / 2, (z0 + z1) / 2)).IsTrue();
     }
 
     [Test]

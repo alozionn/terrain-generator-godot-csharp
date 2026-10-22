@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Godot;
 using Terrain.Core.Foliage;
+using Terrain.Core.Shadows;
 
 namespace Terrain.Surface;
 
@@ -29,13 +30,19 @@ internal sealed class FoliageInstancer
 
     public int MultiMeshCount { get; private set; }
 
+    readonly Dictionary<string, ShadowProxy[]> _proxies = new();
+    /// <summary>Baked-shadow proxies per mesh id, for meshes that cast a baked shadow.</summary>
+    public IReadOnlyDictionary<string, ShadowProxy[]> Proxies => _proxies;
+
     public void LoadMeshes(FoliageMeshSetDefinition set)
     {
         _meshes.Clear();
+        _proxies.Clear();
         foreach (var def in set.Meshes)
         {
             var lods = FoliageMeshes.Lods(def);
-            if (lods.Count > 0) _meshes[def.Id] = (def, lods, FoliageMeshes.LodEnds(def, lods.Count));
+            if (lods.Count > 0) _meshes[def.Id] = (def, lods, FoliageMeshes.LodEnds(def, lods.Count, ChunkSize * 0.71f));
+            if (FoliageMeshes.Proxies(def) is { Length: > 0 } proxies) _proxies[def.Id] = proxies;
         }
     }
 
@@ -55,7 +62,8 @@ internal sealed class FoliageInstancer
                 continue;
             }
 
-            float chunk = mesh.def.Range >= FarRange ? FarChunkSize : ChunkSize;
+            // clumps stay on small chunks: their LOD switch distance allows for exactly that chunk reach
+            float chunk = mesh.def.Range >= FarRange && !FoliageMeshes.IsClump(mesh.def) ? FarChunkSize : ChunkSize;
             var chunks = new Dictionary<(int, int), List<FoliageInstance>>();
             foreach (var f in list)
             {
@@ -64,7 +72,8 @@ internal sealed class FoliageInstancer
                 c.Add(f);
             }
 
-            var shadows = mesh.def.CastShadows ? GeometryInstance3D.ShadowCastingSetting.On : GeometryInstance3D.ShadowCastingSetting.Off;
+            // baked shadows replace realtime ones: steady, soft, and no leaf cards in the shadow pass
+            var shadows = mesh.def.CastShadows && !mesh.def.BakedShadow ? GeometryInstance3D.ShadowCastingSetting.On : GeometryInstance3D.ShadowCastingSetting.Off;
             foreach (var instances in chunks.Values)
                 for (int lod = 0; lod < mesh.lods.Count; lod++)
                 {
@@ -78,7 +87,7 @@ internal sealed class FoliageInstancer
                     for (int i = 0; i < instances.Count; i++)
                     {
                         var f = instances[i];
-                        var basis = new Basis(Vector3.Up, f.Yaw) * Basis.FromEuler(new Vector3(f.TiltX, 0, f.TiltZ));
+                        var basis = Basis.FromEuler(new Vector3(f.TiltX, 0, f.TiltZ)) * new Basis(Vector3.Up, f.Yaw);
                         mm.SetInstanceTransform(i, new Transform3D(basis.Scaled(Vector3.One * f.Scale), new Vector3(f.X, f.Y, f.Z)));
                         mm.SetInstanceColor(i, new Color(f.Tint, f.Tint, f.Tint));
                     }

@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Godot;
 using Terrain.Core.Foliage;
 using Terrain.Core.Generation;
 using Terrain.Core.Level;
+using Terrain.Core.Shadows;
 
 namespace Terrain.Surface;
 
@@ -17,12 +19,33 @@ internal static class FoliageMeshes
     static Shader _grassShader;
     static Shader _foliageShader;
 
-    /// <summary>Distance where each LOD stops drawing: LOD i ends at LodDistance x 3^i, the last at Range. Grass clumps have a single LOD.</summary>
-    public static float[] LodEnds(FoliageMeshDefinition def, int count)
+    /// <summary>Thinning distance scale when looking straight down (the shaders' top_down).</summary>
+    public const float TopDown = 0.6f;
+
+    public static bool IsClump(FoliageMeshDefinition def) => def.Scene is "procedural:grass" or "procedural:flowers";
+
+    /// <summary>Where instances thin out, and where the last ones fade (true distance).</summary>
+    public static (Vector2 thin, Vector2 fade) Thinning(FoliageMeshDefinition def)
+    {
+        var thin = def.Thin.Length >= 2 ? new Vector2(def.Thin[0], def.Thin[1]) : new Vector2(def.Range * 0.3f, def.Range * 0.9f);
+        var fade = def.ThinMin > 0 ? new Vector2(MathF.Max(thin.Y, def.Range * 0.8f), def.Range * 0.97f) : new Vector2(1e6f, 2e6f);
+        return (thin, fade);
+    }
+
+    public static Vector2 BladeThinning(FoliageMeshDefinition def) =>
+        def.BladeThin.Length >= 2 ? new Vector2(def.BladeThin[0], def.BladeThin[1]) : new Vector2(def.LodDistance * 0.4f, def.Range * 0.3f);
+
+    /// <summary>
+    /// Distance where each LOD stops drawing: LOD i ends at LodDistance x 3^i, the last at Range. Clumps switch to
+    /// their light mesh once blade thinning is complete even when looking straight down, plus the reach of a chunk
+    /// (visibility ranges are measured to its centre), so the switch never shows.
+    /// </summary>
+    public static float[] LodEnds(FoliageMeshDefinition def, int count, float chunkReach = 23f)
     {
         var ends = new float[count];
         for (int i = 0; i < count; i++)
             ends[i] = i == count - 1 ? def.Range : MathF.Min(def.Range, def.LodDistance * MathF.Pow(3, i));
+        if (IsClump(def) && count == 2) ends[0] = MathF.Min(def.Range, BladeThinning(def).Y / TopDown + chunkReach);
         return ends;
     }
 
@@ -37,10 +60,11 @@ internal static class FoliageMeshes
             case "grass":
             case "flowers":
                 bool flowers = def.Scene.EndsWith("flowers");
-                var material = GrassMaterial(def, flowers);
-                // one mesh only: the shader thins blades and clumps by each clump's own distance, a smooth circle
-                // around the camera; swapping meshes per chunk showed as squares of different density
-                lods.Add(Clump(def, def.Blades, 1f, flowers, material));
+                var material = GrassMaterial(def);
+                // the shader thins blades and clumps by each clump's own distance, a smooth circle around the camera;
+                // the light mesh holds exactly the blades still drawn once thinning is done, so swapping never shows
+                lods.Add(Clump(def, flowers, material, far: false));
+                if (BladeThinning(def).Y / TopDown < def.Range) lods.Add(Clump(def, flowers, material, far: true));
                 break;
             case "tree_round":
                 lods.Add(Parts(
@@ -89,6 +113,60 @@ internal static class FoliageMeshes
     }
 
     /// <summary>
+    /// Shadow proxies for a mesh with <see cref="FoliageMeshDefinition.BakedShadow"/>: a squashed sphere for the
+    /// canopy, measured from the leaf surfaces' bounds (or given as "canopy"), and a thin one for the trunk when the
+    /// model has bark. Empty for meshes that keep realtime shadows.
+    /// </summary>
+    public static ShadowProxy[] Proxies(FoliageMeshDefinition def)
+    {
+        if (!def.BakedShadow) return Array.Empty<ShadowProxy>();
+        var proxies = new List<ShadowProxy>();
+        var leaves = new List<Vector3>();
+        float barkHeight = 0;
+        if (!def.Scene.StartsWith("procedural:") && ResourceLoader.Exists(def.Scene))
+        {
+            var root = GD.Load<PackedScene>(def.Scene).Instantiate();
+            void Collect(Node n)
+            {
+                if (n is MeshInstance3D { Mesh: { } m })
+                    for (int s = 0; s < m.GetSurfaceCount(); s++)
+                    {
+                        var verts = m.SurfaceGetArrays(s)[(int)Mesh.ArrayType.Vertex].AsVector3Array();
+                        if (IsLeaf(m.SurfaceGetMaterial(s) as BaseMaterial3D)) leaves.AddRange(verts);
+                        else foreach (var v in verts) barkHeight = MathF.Max(barkHeight, v.Y);
+                    }
+                foreach (var c in n.GetChildren()) Collect(c);
+            }
+            Collect(root);
+            root.Free();
+        }
+
+        float density = def.ShadowDensity;
+        if (def.Canopy.Length >= 3)
+            proxies.Add(new ShadowProxy(new System.Numerics.Vector3(0, def.Canopy[2], 0), new System.Numerics.Vector3(def.Canopy[0], def.Canopy[1], def.Canopy[0]), density));
+        else if (leaves.Count > 0)
+            // fitted to where the leaves are, not their bounds: a few lobes give the shadow the canopy's outline
+            proxies.AddRange(CanopyFit.Lobes(leaves.ConvertAll(v => new System.Numerics.Vector3(v.X, v.Y, v.Z)), def.Lobes, density, def.Dapple));
+        if (barkHeight > 0 && proxies.Count > 0)
+        {
+            // trunk: from the ground up to the lowest lobe's middle, as thick as a few percent of the tree is tall
+            float top = proxies.Min(p => p.Centre.Y);
+            float radius = MathF.Max(0.12f, barkHeight * 0.03f);
+            if (top > 0.4f) proxies.Add(new ShadowProxy(new System.Numerics.Vector3(0, top * 0.5f, 0), new System.Numerics.Vector3(radius, top * 0.5f, radius), 6f));
+        }
+        return proxies.ToArray();
+    }
+
+    static bool IsLeaf(BaseMaterial3D src)
+    {
+        string name = (src?.ResourceName ?? "").ToLowerInvariant();
+        bool cutout = src?.Transparency is BaseMaterial3D.TransparencyEnum.AlphaScissor or BaseMaterial3D.TransparencyEnum.Alpha;
+        // the pack cuts out its bark too (alpha mask on Bark_*), so wood is recognised by name before the cut-out test
+        if (name.Contains("bark") || name.Contains("trunk") || name.Contains("wood")) return false;
+        return cutout || name.Contains("lea") || name.Contains("grass") || name.Contains("flower");
+    }
+
+    /// <summary>
     /// A copy of an imported mesh whose surfaces use foliage.gdshader, carrying over each material's texture, colour,
     /// alpha cut-out and normal map. Leaf surfaces (cut-out, or named leaf, leaves, grass or flower) also flutter and get
     /// soft canopy normals; bark only sways.
@@ -103,7 +181,7 @@ internal static class FoliageMeshes
             var src = source.SurfaceGetMaterial(s) as BaseMaterial3D;
             string name = (src?.ResourceName ?? "").ToLowerInvariant();
             bool cutout = src?.Transparency is BaseMaterial3D.TransparencyEnum.AlphaScissor or BaseMaterial3D.TransparencyEnum.Alpha;
-            bool leaf = cutout || name.Contains("lea") || name.Contains("grass") || name.Contains("flower");
+            bool leaf = IsLeaf(src);
             var m = new ShaderMaterial { Shader = _foliageShader };
             if (src != null)
             {
@@ -113,7 +191,8 @@ internal static class FoliageMeshes
                 m.SetShaderParameter("use_normal_map", src.NormalEnabled && src.NormalTexture != null);
                 m.SetShaderParameter("normal_texture", src.NormalTexture);
             }
-            m.SetShaderParameter("sway", def.Wind);
+            // stiff models (trees) keep the trunk nearly still; leaves give a little more than the wood they hang on
+            m.SetShaderParameter("sway", def.Wind * (1f - def.Stiffness * (leaf ? 0.6f : 1f)));
             m.SetShaderParameter("model_height", height);
             m.SetShaderParameter("flutter", leaf ? def.Wind * 0.12f : 0f);
             m.SetShaderParameter("leaf_normals", leaf ? def.LeafNormals : 0f);
@@ -124,29 +203,34 @@ internal static class FoliageMeshes
                 m.SetShaderParameter("root_color", ToColor(def.Recolor[0]));
                 m.SetShaderParameter("tip_color", ToColor(def.Recolor[1]));
             }
-            if (def.Fade)
-            {
-                m.SetShaderParameter("fade_start", def.Range * 0.3f);
-                m.SetShaderParameter("fade_end", def.Range * 0.9f);
-            }
+            if (def.Fade) SetThinning(m, def);
+            // things that cast a baked shadow stand above it; ground cover sits in it
+            m.SetShaderParameter("receive_bake", def.ReceiveBake && !def.BakedShadow);
+            // without realtime shadows a canopy would be lit evenly through; darken its inside and underside instead
+            m.SetShaderParameter("canopy_ao", def.BakedShadow && leaf ? 0.4f : 0f);
             mesh.SurfaceSetMaterial(s, m);
         }
         return mesh;
     }
 
     /// <summary>
-    /// A clump of curved, tapering blades (three segments each). UV.y is height along the blade, UV.x marks flower
-    /// heads (2), vertex colour gives each blade its own brightness. Blades lean outward from the clump centre.
+    /// A clump of curved, tapering blades. UV.y is height along the blade, UV.x marks flower heads (2), UV2 is the
+    /// vertex's sideways offset from the blade's centre line (so the shader can widen blades), vertex colour gives each
+    /// blade its own brightness and, in alpha, its distance cut-off. Blades lean outward from the clump centre.
+    /// The far mesh keeps only the blades that survive thinning, with two segments instead of three.
     /// </summary>
-    static ArrayMesh Clump(FoliageMeshDefinition def, int blades, float widthScale, bool flowers, Material material)
+    static ArrayMesh Clump(FoliageMeshDefinition def, bool flowers, Material material, bool far)
     {
         var st = new SurfaceTool();
         st.Begin(Mesh.PrimitiveType.Triangles);
-        uint seed = Seeds.Derive(1, def.Id + blades);
+        uint seed = Seeds.Derive(1, def.Id + def.Blades);
         float Rand(int i, int k) => (Seeds.Hash(i, k, seed) >> 8) / 16777216f;
+        int segs = far ? 2 : 3;
 
-        for (int b = 0; b < blades; b++)
+        for (int b = 0; b < def.Blades; b++)
         {
+            float cutoff = Rand(b, 9);
+            if (far && cutoff >= def.BladeMin) continue;
             float r = def.Radius * MathF.Sqrt(Rand(b, 0)), a = Rand(b, 1) * MathF.Tau;
             var basePos = new Vector3(MathF.Cos(a) * r, 0, MathF.Sin(a) * r);
             float h = Mathf.Lerp(def.BladeHeight[0], def.BladeHeight[^1], Rand(b, 2));
@@ -155,43 +239,48 @@ internal static class FoliageMeshes
             // lean away from the centre, plus some randomness
             var lean = (new Vector3(MathF.Cos(a), 0, MathF.Sin(a)) * 0.6f + new Vector3(Rand(b, 4) - 0.5f, 0, Rand(b, 5) - 0.5f)).Normalized();
             float curve = 0.45f + 0.4f * Rand(b, 6); // strong lean so blades still read from a high camera
-            float w = def.BladeWidth * widthScale * (0.85f + 0.4f * Rand(b, 7));
+            float w = def.BladeWidth * (0.85f + 0.4f * Rand(b, 7));
             float brightness = 0.9f + 0.18f * Rand(b, 8);
-            var shade = new Color(brightness, brightness, brightness, Rand(b, 9)); // alpha: the blade's distance cut-off
+            var shade = new Color(brightness, brightness, brightness, cutoff);
             var normal = lean.Cross(side).Normalized();
             if (normal.Y < 0) normal = -normal;
 
             Vector3 At(float t) => basePos + Vector3.Up * h * t + lean * h * curve * t * t;
             float Width(float t) => w * MathF.Pow(1 - t, 0.7f);
+            Vertex Edge(float t, float sign)
+            {
+                var o = side * Width(t) * sign;
+                return new Vertex(At(t) + o, t, new Vector2(o.X, o.Z));
+            }
 
-            const int segs = 3;
             for (int s = 0; s < segs; s++)
             {
                 float t0 = (float)s / segs, t1 = (float)(s + 1) / segs;
-                Vector3 l0 = At(t0) - side * Width(t0), r0 = At(t0) + side * Width(t0);
-                Vector3 l1 = At(t1) - side * Width(t1), r1 = At(t1) + side * Width(t1);
                 if (s == segs - 1)
-                    Tri(st, (l0, t0), (r0, t0), (At(1), 1f), normal, shade, 0);
+                    Tri(st, Edge(t0, -1), Edge(t0, 1), new Vertex(At(1), 1f, Vector2.Zero), normal, shade, 0);
                 else
                 {
-                    Tri(st, (l0, t0), (r0, t0), (r1, t1), normal, shade, 0);
-                    Tri(st, (l0, t0), (r1, t1), (l1, t1), normal, shade, 0);
+                    Tri(st, Edge(t0, -1), Edge(t0, 1), Edge(t1, 1), normal, shade, 0);
+                    Tri(st, Edge(t0, -1), Edge(t1, 1), Edge(t1, -1), normal, shade, 0);
                 }
             }
 
-            // flowers: every other blade carries a small five-petal head at its tip
-            if (flowers && b % 2 == 0)
+            // flowers: some blades carry a small five-petal head at their tip
+            if (flowers && Rand(b, 10) < def.Heads)
             {
                 var tip = At(1f);
-                float pr = 0.05f * widthScale + 0.03f;
+                float pr = 0.08f;
                 for (int p = 0; p < 5; p++)
                 {
                     float pa = p * MathF.Tau / 5 + facing, pb = pa + MathF.Tau / 10;
-                    var e0 = tip + new Vector3(MathF.Cos(pa), 0.15f, MathF.Sin(pa)) * pr;
-                    var e1 = tip + new Vector3(MathF.Cos(pb), 0.15f, MathF.Sin(pb)) * pr * 0.6f;
-                    var e2 = tip + new Vector3(MathF.Cos(pa - MathF.Tau / 10), 0.15f, MathF.Sin(pa - MathF.Tau / 10)) * pr * 0.6f;
-                    Tri(st, (tip, 1f), (e2, 1f), (e0, 1f), Vector3.Up, shade, 2);
-                    Tri(st, (tip, 1f), (e0, 1f), (e1, 1f), Vector3.Up, shade, 2);
+                    var e0 = new Vector3(MathF.Cos(pa), 0.15f, MathF.Sin(pa)) * pr;
+                    var e1 = new Vector3(MathF.Cos(pb), 0.15f, MathF.Sin(pb)) * pr * 0.6f;
+                    var e2 = new Vector3(MathF.Cos(pa - MathF.Tau / 10), 0.15f, MathF.Sin(pa - MathF.Tau / 10)) * pr * 0.6f;
+                    // petals widen with the blades, so heads stay visible as blades thin out
+                    Vertex Petal(Vector3 e) => new(tip + e, 1f, new Vector2(e.X, e.Z));
+                    var centre = new Vertex(tip, 1f, Vector2.Zero);
+                    Tri(st, centre, Petal(e2), Petal(e0), Vector3.Up, shade, 2);
+                    Tri(st, centre, Petal(e0), Petal(e1), Vector3.Up, shade, 2);
                 }
             }
         }
@@ -199,30 +288,43 @@ internal static class FoliageMeshes
         return st.Commit();
     }
 
-    static void Tri(SurfaceTool st, (Vector3 p, float t) a, (Vector3 p, float t) b, (Vector3 p, float t) c, Vector3 n, Color shade, float mark)
+    readonly record struct Vertex(Vector3 P, float T, Vector2 Offset);
+
+    static void Tri(SurfaceTool st, Vertex a, Vertex b, Vertex c, Vector3 n, Color shade, float mark)
     {
-        foreach (var (p, t) in new[] { a, b, c })
+        foreach (var v in new[] { a, b, c })
         {
             st.SetNormal(n);
             st.SetColor(shade);
-            st.SetUV(new Vector2(mark, t));
-            st.AddVertex(p);
+            st.SetUV(new Vector2(mark, v.T));
+            st.SetUV2(v.Offset);
+            st.AddVertex(v.P);
         }
     }
 
-    static ShaderMaterial GrassMaterial(FoliageMeshDefinition def, bool flowers)
+    static ShaderMaterial GrassMaterial(FoliageMeshDefinition def)
     {
         _grassShader ??= GD.Load<Shader>("res://terrain/surface/grass.gdshader");
         var m = new ShaderMaterial { Shader = _grassShader };
         m.SetShaderParameter("root_color", ToColor(def.RootColor));
         m.SetShaderParameter("tip_color", ToColor(def.Color));
         m.SetShaderParameter("head_color", ToColor(def.HeadColor));
-        // thinned out before the instancer culls the cell, so the grass edge never shows as squares
-        m.SetShaderParameter("fade_start", def.Range * 0.3f);
-        m.SetShaderParameter("fade_end", def.Range * 0.9f);
-        m.SetShaderParameter("blade_thin_start", def.LodDistance * 0.4f);
-        m.SetShaderParameter("blade_thin_end", def.Range * 0.3f);
+        SetThinning(m, def);
+        m.SetShaderParameter("blade_thin", BladeThinning(def));
+        m.SetShaderParameter("blade_min", def.BladeMin);
+        m.SetShaderParameter("blade_widen", def.BladeWiden);
         return m;
+    }
+
+    /// <summary>Distance thinning shared by grass.gdshader and foliage.gdshader (foliage_common.gdshaderinc).</summary>
+    static void SetThinning(ShaderMaterial m, FoliageMeshDefinition def)
+    {
+        var (thin, fade) = Thinning(def);
+        m.SetShaderParameter("thin", thin);
+        m.SetShaderParameter("thin_min", def.ThinMin);
+        m.SetShaderParameter("fade", fade);
+        m.SetShaderParameter("compensate", def.Compensate);
+        m.SetShaderParameter("top_down", TopDown);
     }
 
     static ArrayMesh Parts(params (PrimitiveMesh shape, Color color, Vector3 position)[] parts)

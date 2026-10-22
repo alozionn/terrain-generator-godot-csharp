@@ -11,16 +11,21 @@ ground_horizon_color = Color(0.72, 0.82, 0.92, 1)
 
 [sub_resource type="Sky" id="sky"]
 sky_material = SubResource("sky_mat")
+radiance_size = 2
 
 [sub_resource type="Environment" id="env"]
 background_mode = 2
 sky = SubResource("sky")
 ambient_light_source = 3
-tonemap_mode = 2
+reflected_light_source = 2
+tonemap_mode = 3
+tonemap_white = 6.0
 ssao_enabled = true
 fog_enabled = true
 fog_light_color = Color(0.7, 0.8, 0.9, 1)
 fog_density = 0.0003
+fog_aerial_perspective = 1.0
+fog_sky_affect = 0.0
 
 [sub_resource type="PlaneMesh" id="sea"]
 size = Vector2(4000, 4000)
@@ -37,14 +42,16 @@ script = ExtResource("1")
 environment = SubResource("env")
 
 [node name="Sun" type="DirectionalLight3D" parent="." unique_id=991996299]
-transform = Transform3D(0.707107, -0.5, 0.5, 0, 0.707107, 0.707107, -0.707107, -0.5, 0.5, 0, 50, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 50, 0)
 light_energy = 1.2
 shadow_enabled = true
 directional_shadow_mode = 1
 directional_shadow_max_distance = 250.0
 
-[node name="Terrain" type="Node3D" parent="." unique_id=217480071]
+[node name="Terrain" type="Node3D" parent="." unique_id=217480071 node_paths=PackedStringArray("Sun", "Environment")]
 script = ExtResource("2")
+Sun = NodePath("../Sun")
+Environment = NodePath("../WorldEnvironment")
 
 [node name="SeaPlaceholder" type="MeshInstance3D" parent="." unique_id=1350192061]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 100, 0, 100)

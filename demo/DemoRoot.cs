@@ -4,12 +4,13 @@ using Godot;
 namespace Terrain.Demo;
 
 /// <summary>
-/// Demo: orbit camera around the terrain plus a few keys. R reroll seed, P cycle palette, G toggle grid.
+/// Demo: orbit camera around the terrain plus a few keys. R reroll seed, P cycle palette, L cycle lighting, G toggle grid.
 /// `-- --shot path.png` saves one frame and quits (for reviewing changes without opening the editor).
 /// </summary>
 public partial class DemoRoot : Node3D
 {
     static readonly string[] Palettes = { "meadow", "dusk_bloom" };
+    static readonly string[] Lightings = { "default", "golden", "pastel" };
 
     Terrain _terrain;
     Camera3D _camera;
@@ -17,7 +18,7 @@ public partial class DemoRoot : Node3D
     Vector3 _focus;
     float _yaw = 35f, _pitch = 48f, _distance = 150f;
     bool _dragging;
-    int _palette;
+    int _palette, _lighting;
     // shot mode: settle for 3 s, then average frame time over the next 3 s, save, quit
     double _shotClock = -1, _shotMeasured;
     int _shotSamples;
@@ -58,6 +59,9 @@ public partial class DemoRoot : Node3D
             UpdateCamera();
         }
         if (Array.IndexOf(args, "--nogrid") >= 0) _terrain.ShowGrid = false;
+        // --lighting id switches the lighting preset
+        int li = Array.IndexOf(args, "--lighting");
+        if (li >= 0 && li + 1 < args.Length) _terrain.SetLighting(args[li + 1]);
     }
 
     void OnGenerated()
@@ -69,7 +73,7 @@ public partial class DemoRoot : Node3D
         UpdateCamera();
         string issues = _terrain.Issues.Count == 0 ? "no issues" : string.Join("\n", _terrain.Issues);
         _info.Text = $"{_terrain.Level.Id}  seed {_terrain.Level.Seed}  palette {_terrain.Level.Palette}\n{issues}\n" +
-                     "R reroll · P palette · G grid · RMB orbit · MMB pan · wheel zoom";
+                     "R reroll · P palette · L lighting · G grid · RMB orbit · MMB pan · wheel zoom";
     }
 
     public override void _Process(double delta)
@@ -105,6 +109,7 @@ public partial class DemoRoot : Node3D
                 if (k.Keycode == Key.R) _terrain.Reroll((uint)GD.Randi());
                 else if (k.Keycode == Key.P) _terrain.SetPalette(Palettes[(_palette + 1) % Palettes.Length]);
                 else if (k.Keycode == Key.G) _terrain.ShowGrid = !_terrain.ShowGrid;
+                else if (k.Keycode == Key.L) _terrain.SetLighting(Lightings[_lighting = (_lighting + 1) % Lightings.Length]);
                 break;
             case InputEventMouseButton mb:
                 if (mb.ButtonIndex is MouseButton.Right or MouseButton.Middle) _dragging = mb.Pressed;

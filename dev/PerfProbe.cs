@@ -6,6 +6,7 @@ using Terrain.Core.Foliage;
 using Terrain.Core.Generation;
 using Terrain.Core.Ground;
 using Terrain.Core.Level;
+using Terrain.Core.Shadows;
 using Terrain.Core.World;
 using Terrain.Surface;
 using TokisanGames;
@@ -15,7 +16,7 @@ namespace Terrain.Dev;
 /// <summary>
 /// Isolated ground-rendering cost: same level, same camera, sun with shadows, procedural sky, no decals, SSAO, fog or
 /// UI. Measures GPU time with the viewport's render timer (3 s settle, then 3 s average), prints it, quits.
-/// godot --path . res://dev/perf_probe.tscn -- --mode MODE [--view x,z,yaw,pitch,dist] [--splits 1|2|4] [--shadowdist m] [--shadowsize px]
+/// godot --path . res://dev/perf_probe.tscn -- --mode MODE [--view x,z,yaw,pitch,dist] [--splits 1|2|4] [--shadowdist m] [--shadowsize px] [--skip mesh,mesh]
 /// Modes: none, flat (vertex colours only), ground (our renderer), ground_foliage, t3d, t3d_lite, t3d_foliage.
 /// </summary>
 public partial class PerfProbe : Node3D
@@ -41,11 +42,12 @@ public partial class PerfProbe : Node3D
         var level = Read<LevelDefinition>("res://data/levels/harbour_village.json");
         var layout = Read<LayoutDefinition>($"res://data/layouts/{level.Layout}.json");
         var palette = Read<PaletteDefinition>($"res://data/palettes/{level.Palette}.json");
-        var world = LevelGenerator.Generate(level, layout, palette).World;
+        var sets = level.Foliage.Select(id => Read<FoliageSetDefinition>($"res://data/foliage/sets/{id}.json")).ToList();
+        var world = LevelGenerator.Generate(level, layout, palette, sets).World;
         var textures = GroundTextures.Load(Read<TextureSetDefinition>("res://data/ground/textures.json"));
-        var ground = GroundMaps.Build(world, palette, textures.Ids, level.Seed);
+        var ground = GroundMaps.Build(world, palette, textures.Ids, level.Seed, sets);
         var meshes = Read<FoliageMeshSetDefinition>("res://data/foliage/meshes.json");
-        FoliageResult Foliage() => FoliageStage.Run(world, level.Foliage.Select(id => Read<FoliageSetDefinition>($"res://data/foliage/sets/{id}.json")).ToList(), level.Seed,
+        FoliageResult Foliage() => FoliageStage.Run(world, sets, level.Seed,
             world.CellMask(level.Placements.Select(p => (p.Cell[0], p.Cell[1], p.Cells[0], p.Cells[1]))));
 
         switch (_mode)
@@ -56,14 +58,23 @@ public partial class PerfProbe : Node3D
                 AddChild(new MeshInstance3D { Mesh = FlatMesh(world, palette) });
                 break;
             case "ground":
-            case "ground_foliage":
                 new GroundRenderer(this).Build(world, ground, textures);
-                if (_mode == "ground_foliage")
-                {
-                    var instancer = new FoliageInstancer(this);
-                    instancer.LoadMeshes(meshes);
-                    instancer.Build(Foliage());
-                }
+                break;
+            case "ground_foliage":
+                var foliage = Foliage();
+                // --skip a,b drops those meshes, to see what each one costs
+                foreach (var id in Arg("--skip", "").Split(',', StringSplitOptions.RemoveEmptyEntries)) foliage.ByMesh.Remove(id);
+                new GroundRenderer(this).Build(world, ground, textures, foliage);
+                var instancer = new FoliageInstancer(this);
+                instancer.LoadMeshes(meshes);
+                instancer.Build(foliage);
+                GD.Print("[Probe] instances: " + string.Join(", ", foliage.ByMesh.OrderByDescending(p => p.Value.Count).Select(p => $"{p.Key} {p.Value.Count}")));
+                // the decor shadow bake, as the terrain node does it (same sun as the light below)
+                var map = ShadowBake.Bake(world, foliage, instancer.Proxies, new System.Numerics.Vector3(0.5f, 0.707107f, 0.5f));
+                var bytes = map.Light.Select(l => (byte)Math.Clamp((int)MathF.Round(l * 255f), 0, 255)).ToArray();
+                RenderingServer.GlobalShaderParameterSet("terrain_shadow", ImageTexture.CreateFromImage(Image.CreateFromData(map.Size, map.Size, false, Image.Format.R8, bytes)));
+                RenderingServer.GlobalShaderParameterSet("terrain_shadow_rect", new Vector4(0, 0, 1f / (map.Size * map.Texel), 1f / (map.Size * map.Texel)));
+                RenderingServer.GlobalShaderParameterSet("terrain_shadow_strength", 1f);
                 break;
             case "t3d":
             case "t3d_lite":

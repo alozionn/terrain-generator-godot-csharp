@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "id": "pinewood",
+  // cold slopes: pines between stones, wispy grass, bare earth
+  "climate": { "temperature": [0.0, 0.42], "moisture": [0.0, 1.0] },
+  "ground": { "bands": ["grass", "meadow", "hill", "rock"], "tint": "#d4dcc4", "patches": "dirt",
+              "patchAmount": 0.7, "patchFrequency": 0.06, "patchThreshold": 0.15 },
+  "species": [
+    { "id": "pines", "meshes": ["pine_1", "pine_2", "pine_3", "pine_4", "pine_5"], "density": 9, "spacing": 3.5, "footprint": 2,
+      "bands": ["grass", "meadow", "hill", "rock"], "height": [1.5, 13], "maxSlope": 40, "playableMargin": 2,
+      "scale": [0.7, 1.1], "tilt": 2, "tintJitter": 0.06, "clusters": { "frequency": 0.03, "threshold": -0.3, "softness": 0.3 } },
+    { "id": "stones", "meshes": ["rock_1", "rock_2", "rock_3"], "density": 2, "spacing": 3.5, "footprint": 1.2,
+      "height": [1.0, 16], "maxSlope": 45, "playableMargin": 1, "scale": [0.25, 0.55], "tilt": 15, "tintJitter": 0.08,
+      "ridge": [-1, 0.1], "alignToSlope": 0.6, "sink": [0.3, 0.6] },
+    { "id": "wisps", "meshes": ["grass_wispy", "grass_wispy_tall"], "density": 30, "spacing": 1.2,
+      "bands": ["grass", "meadow", "hill", "rock"], "height": [1.0, 14], "maxSlope": 40, "avoidPlayable": false,
+      "playableDensity": 0.3, "playableScale": 0.7, "scale": [0.35, 0.55], "tilt": 8, "tintJitter": 0.08,
+      "clusters": { "frequency": 0.05, "threshold": -0.2, "softness": 0.4 }, "cover": "#8d9a58", "coverArea": 0.6 },
+    { "id": "short_grass", "mesh": "grass_short", "density": 90, "spacing": 0.6,
+      "bands": ["grass", "meadow", "hill"], "height": [1.0, 12], "maxSlope": 35, "avoidPlayable": false,
+      "playableDensity": 0.5, "playableScale": 0.8, "scale": [0.8, 1.1], "tilt": 8, "tintJitter": 0.1 }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "id": "golden",
+  // early evening under the Poly Haven "evening road" sky: low warm sun, long tree shadows. The elevation matches the
+  // sun painted in the panorama; the yaw is free (the sky turns to follow it).
+  "sun": { "yaw": 250, "elevation": 15.4, "color": "#ffe6cc", "energy": 1.6, "angularSize": 2.0 },
+  "sky": { "panorama": "res://assets/skies/evening_road_01_puresky.png", "sunAzimuth": 44.6, "energy": 1.0, "ambientEnergy": 1.0 },
+  "fog": { "color": "#e6d1c2", "density": 0.0005 },
+  "bake": { "texel": 0.5, "blur": 1, "strength": 1.0 }
+}

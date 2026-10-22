@@ -61,7 +61,8 @@ public static class ConstraintStage
             int nx = cx + dx, nz = cz + dz;
             if (nx < 0 || nz < 0 || nx >= w.Cells || nz >= w.Cells) continue;
             if (w.CellZone[nz * w.Cells + nx] == zone) continue;
-            if (w.CellHeight(nx, nz) < 0f) return true;
+            // any water in the neighbouring cell counts: a sea zone's own cells stop at the shoreline
+            if (w.CellRange(nx, nz).min < 0f) return true;
         }
         return false;
     }
