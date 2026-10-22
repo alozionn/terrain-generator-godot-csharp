@@ -195,6 +195,8 @@ internal static class FoliageMeshes
             m.SetShaderParameter("sway", def.Wind * (1f - def.Stiffness * (leaf ? 0.6f : 1f)));
             m.SetShaderParameter("model_height", height);
             m.SetShaderParameter("flutter", leaf ? def.Wind * 0.12f : 0f);
+            // stiff (tree-sized) models sway at about half the speed of grass
+            m.SetShaderParameter("sway_speed", 1f - 0.55f * def.Stiffness);
             m.SetShaderParameter("leaf_normals", leaf ? def.LeafNormals : 0f);
             m.SetShaderParameter("canopy_height", height * 0.6f);
             if (def.Recolor.Length == 2 && (name.Contains("lea") || name.Contains("grass")))
@@ -207,7 +209,7 @@ internal static class FoliageMeshes
             // things that cast a baked shadow stand above it; ground cover sits in it
             m.SetShaderParameter("receive_bake", def.ReceiveBake && !def.BakedShadow);
             // without realtime shadows a canopy would be lit evenly through; darken its inside and underside instead
-            m.SetShaderParameter("canopy_ao", def.BakedShadow && leaf ? 0.4f : 0f);
+            m.SetShaderParameter("canopy_ao", def.BakedShadow && leaf ? 0.2f : 0f);
             mesh.SurfaceSetMaterial(s, m);
         }
         return mesh;

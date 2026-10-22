@@ -51,7 +51,7 @@ void vertex() {
 	vec3 world = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
 	vec2 dir = normalize(wind_direction);
 	float gust = sin(TIME * wind_speed + dot(world.xz, dir) * gust_scale * 6.2832) * 0.5 + 0.5;
-	float flutter = sin(TIME * wind_speed * 3.1 + world.x * 1.7 + world.z * 1.1);
+	float flutter = sin(TIME * wind_speed * 2.2 + world.x * 1.7 + world.z * 1.1);
 	float bend = wind_strength * (0.25 + gust * 0.75 + flutter * 0.15) * v_height * v_height * size;
 	VERTEX += foliage_to_local(vec3(dir.x * bend, -0.35 * bend * bend, dir.y * bend), MODEL_MATRIX);
 

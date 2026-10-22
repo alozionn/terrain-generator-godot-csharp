@@ -4,7 +4,7 @@
 
 group_uniforms wind;
 uniform vec2 wind_direction = vec2(1.0, 0.35);
-uniform float wind_speed = 1.3;
+uniform float wind_speed = 1.0;
 uniform float gust_scale = 0.06; // cycles per metre of the rolling gusts
 group_uniforms distance;
 // Instances thin out with distance instead of shrinking: each has its own random cut-off, so the edge is a soft

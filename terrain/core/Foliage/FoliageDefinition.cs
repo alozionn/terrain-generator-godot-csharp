@@ -162,7 +162,7 @@ public sealed class FoliageMeshDefinition
     /// <summary>Authored scenes: 0..1, how much less the model sways (wood not at all at 1, leaves 40%); for trees.</summary>
     public float Stiffness { get; set; }
     /// <summary>Authored scenes: how much leaf normals bend outward from the canopy (soft, painterly shading), 0..1.</summary>
-    public float LeafNormals { get; set; } = 0.6f;
+    public float LeafNormals { get; set; } = 0.35f;
     /// <summary>Authored scenes: thin instances out with camera distance like the grass does (ground cover).</summary>
     public bool Fade { get; set; }
     /// <summary>

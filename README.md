@@ -46,6 +46,18 @@ Probe modes: `none`, `flat`, `ground`, `ground_foliage`, `t3d`, `t3d_lite`, `t3d
 - Board: zone grid decals that follow the playable cells, pre-placed buildings fitted to their footprint. Trees, rocks and grass ease out toward the board along a wandering edge. Mountain rocks keep to the gullies, half buried and leaning with the slope.
 - GPU, ground plus foliage: 0.64–0.69 ms at the board and mountain cameras (was 0.75–0.82 ms before baked shadows), 0.94 ms looking over meadow and forest. Trees are most of it (about 0.4 ms of leaf cards); grass is cheap. Full demo frame about 1.2 ms at the board camera.
 
+## Tree and bush look (2026-10-22)
+
+Round-crowned trees and bushes read as soft green blobs; pines were fine. Causes and what was done, all in `terrain/surface/foliage.gdshader`:
+
+- **Black leaf cards (fixed).** Godot flips the normal on the back of double-sided surfaces; with leaf normals bent outward from the canopy, back-facing cards pointed into the tree and went black. The flip is undone for every surface.
+- **Mush up close (fixed).** Bending every leaf normal outward and wrapping the light far evened out the light and dark between cards. Now: half the bend (`leafNormals` 0.35), less wrap (0.4), soft **light bands** (lit, half, shade mixed 60% with the gradient, `bands`), and a **brightness and warmth shift per clump** of leaves (`clump_variation`, clumps of `clump_size` metres), so clusters separate even in flat light.
+- **Blobs at distance (fixed).** Cut-out leaves thinned away in the smaller mip levels, so far canopies melted into soft shapes. Alpha is now scaled up by mip level (`mip_alpha`), so distant trees keep a leafy silhouette. Costs about 0.03 ms at the board camera (more leaf pixels survive).
+- **Wind (fixed).** Trunks were treated as leaves (the pack cuts out its bark too); wood is now told apart by material name. Trees sway at about half the speed of grass, and leaf flutter is a slow 2–3 Hz drift.
+- **Not the cause: draw distance.** Trees draw fully to 450 m with no fade. Longer distances would only help grass and flowers, at real GPU cost.
+- **Not done: outline pass.** A per-mesh inverted hull is cheap but fails on leaf cards. A full-screen depth-edge pass (about 0.1–0.2 ms) limited to large depth jumps would outline trees, rocks and buildings against the ground without outlining every grass blade, but it helps silhouettes, not the detail inside a canopy, and it is a whole-scene art choice. Left as an experiment.
+- **Still to try.** Darker canopy undersides than the bands give (the reference shots keep a strong shade side), a hue shift in the shade band toward blue-green, and bushes getting the same treatment as tree leaves (they use `recolor`, so their clumps vary less).
+
 ## Next steps
 
 Suggested order; each one stands on its own.
