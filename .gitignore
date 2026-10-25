@@ -14,3 +14,6 @@ addons/terrain_3d/bin/*
 !addons/terrain_3d/bin/libterrain.windows.release.x86_64.dll
 # lock-file copies Windows leaves next to loaded DLLs
 *.TMP
+
+# Local roadmap: next steps stay off GitHub
+ROADMAP.md

@@ -37,7 +37,7 @@ godot --path . res://dev/perf_probe.tscn -- --mode ground_foliage --view 94,98,3
 
 Probe modes: `none`, `flat`, `ground`, `ground_foliage`, `t3d`, `t3d_lite`, `t3d_foliage`. GPU time only; no SSAO, decals or UI. `ground_foliage` prints instance counts per mesh; `--skip mesh,mesh` leaves meshes out to see what each costs.
 
-## Where it stands (2026-10-22)
+## What it does
 
 - Generator: island shape, stamps, detail, erosion (runevision-style filter: gullies, crests and a ridge map), playable zones (rounded corners, wandering blend edges) with height windows, bands, climate (temperature and moisture), Voronoi regions, a biome per region, rule checks (zone windows, touches-sea, zones and placements on the map).
 - Biomes: regional foliage sets (meadow, forest, pinewood, heath) chosen per region by climate, interleaving across borders; each tints its ground and lays patches of its own texture (dirt, leaf litter, dry grass). A global set (rocks, stones) grows everywhere.
@@ -47,7 +47,7 @@ Probe modes: `none`, `flat`, `ground`, `ground_foliage`, `t3d`, `t3d_lite`, `t3d
 - Board: zone grid decals that follow the playable cells, pre-placed buildings fitted to their footprint. Trees, rocks and grass ease out toward the board along a wandering edge. Mountain rocks keep to the gullies, half buried and leaning with the slope.
 - GPU, ground plus foliage: 0.64–0.69 ms at the board and mountain cameras (was 0.75–0.82 ms before baked shadows), 0.94 ms looking over meadow and forest. Trees are most of it (about 0.4 ms of leaf cards); grass is cheap. Full demo frame about 1.2 ms at the board camera.
 
-## Tree and bush look (2026-10-22)
+## Tree and bush look
 
 Round-crowned trees and bushes read as soft green blobs; pines were fine. Causes and what was done, all in `terrain/surface/foliage.gdshader`:
 
@@ -56,23 +56,6 @@ Round-crowned trees and bushes read as soft green blobs; pines were fine. Causes
 - **Blobs at distance (fixed).** Cut-out leaves thinned away in the smaller mip levels, so far canopies melted into soft shapes. Alpha is now scaled up by mip level (`mip_alpha`), so distant trees keep a leafy silhouette. Costs about 0.03 ms at the board camera (more leaf pixels survive).
 - **Wind (fixed).** Trunks were treated as leaves (the pack cuts out its bark too); wood is now told apart by material name. Trees sway at about half the speed of grass, and leaf flutter is a slow 2–3 Hz drift.
 - **Not the cause: draw distance.** Trees draw fully to 450 m with no fade. Longer distances would only help grass and flowers, at real GPU cost.
-- **Not done: outline pass.** A per-mesh inverted hull is cheap but fails on leaf cards. A full-screen depth-edge pass (about 0.1–0.2 ms) limited to large depth jumps would outline trees, rocks and buildings against the ground without outlining every grass blade, but it helps silhouettes, not the detail inside a canopy, and it is a whole-scene art choice. Left as an experiment.
-- **Still to try.** Darker canopy undersides than the bands give (the reference shots keep a strong shade side), a hue shift in the shade band toward blue-green, and bushes getting the same treatment as tree leaves (they use `recolor`, so their clumps vary less).
-
-## Next steps
-
-Suggested order; each one stands on its own.
-
-1. **Tree cost.** Leaf-card overdraw is the biggest foliage cost now. Try LODs or impostors for distant trees, fewer and larger leaf cards, or opaque canopy shells far out.
-2. **Frame cost toward 1 ms** (see DESIGN.md, "Performance budget"). Decide SSAO (about 0.5 ms on its own), try Vulkan vs D3D12 and the Mobile renderer, profile per pass (Visual Profiler, RenderDoc).
-3. **Grass on the board.** From the board camera playable cells are nearly bare (tall grass is cut to 6%, short grass is gone by 30 m). Likely a low lawn layer for playable cells that lasts to board distance. Also tune biome colours and densities by eye.
-4. **Foliage IDs and interactive trees** (DESIGN.md, "Gameplay foliage and cleanup"): stable IDs from species and grid slot, an `interactive` flag, pick shapes, saves storing changes. `Terrain.RebakeShadows` already re-bakes the area around a cut or planted tree.
-5. **Layout pass.** Move the mountain that blocks the board view, raise the island base so decor isn't all grass, add more stamps and a second layout. Consider a small painted image as a layout input.
-6. **Paths and a "nothing grows here" mask.** Painted onto the ground (dirt texture) and into foliage rules; the pack's RockPath models can line them.
-7. **Ocean.** Watch the frame: if it drops to around 200–300 fps, rebuild foliage (DESIGN.md, "Performance budget"). Bring Tech_ocean in at y = 0 instead of the placeholder plane; optionally hand it a water-depth texture so waves calm and foam rises in the shallows.
-8. **Gameplay hook-up.** Connect Mushrook's grid and occupancy to `WorldData` / `CellAt`, building rules by band name, zones connecting (ramps, paths), packed vs scattered building spots once gameplay says which.
-9. **Erosion detail.** Run the erosion filter again at 25 cm into a normal texture for the ground shader, so the finest gullies show without more vertices; bake the low-sun shadows faster.
-10. **Bigger maps.** 500 m levels: check generation and bake time, ground chunk LOD if needed, and re-run the perf probe (Terrain3D comparison included).
 
 ## Terrain3D (dev only)
 
