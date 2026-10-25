@@ -1,6 +1,6 @@
 # Sky panoramas
 
-Copied from the ocean blueprint (`ai-ocean-blueprint/demo/skies`), where they were downloaded and prepared.
+Copied from Tech_ocean (`ocean/demo/skies`), where they were downloaded and prepared.
 
 ## evening_road_01_puresky.png (start sky)
 - Source: https://dl.polyhaven.org/file/ph-assets/HDRIs/extra/Tonemapped%20JPG/evening_road_01_puresky.jpg (8192x4096)

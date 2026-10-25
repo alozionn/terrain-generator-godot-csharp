@@ -1,6 +1,6 @@
-# Terrain blueprint: design
+# Tech_terrain: design
 
-The terrain generator for Mushrook. It makes the board a level is played on: a smooth heightmap with playable zones, ground bands, and later resources and foliage. It is built the way the ocean blueprint is: a core in plain C# with no Godot types, a Godot node that draws it, and parameter sets for the UI.
+The terrain generator for Mushrook. It makes the board a level is played on: a smooth heightmap with playable zones, ground bands, and later resources and foliage. It is built the way Tech_ocean is: a core in plain C# with no Godot types, a Godot node that draws it, and parameter sets for the UI.
 
 ## The game this serves
 
