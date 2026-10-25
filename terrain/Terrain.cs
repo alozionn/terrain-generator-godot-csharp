@@ -229,6 +229,9 @@ public partial class Terrain : Node3D
         f?.StoreString(LevelJson.Serialize(Level));
     }
 
+    /// <summary>The node placed for a level placement (by its id), or null.</summary>
+    public Node3D PlacedNode(string id) => _placements?.Node(id);
+
     /// <summary>World-space position of a cell's centre, on the ground.</summary>
     public Vector3 CellCentre(int cx, int cz)
     {

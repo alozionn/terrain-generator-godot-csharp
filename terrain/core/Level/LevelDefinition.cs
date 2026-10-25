@@ -110,6 +110,37 @@ public sealed class PlacementDefinition
     public bool Fit { get; set; } = true;
     /// <summary>Fraction of the footprint the model fills when fitted.</summary>
     public float Fill { get; set; } = 0.9f;
+    /// <summary>
+    /// Height in metres for the model's origin, instead of standing its base on the ground: props on the water
+    /// (pontoons, boats; 0 is sea level). Such placements need no playable zone.
+    /// </summary>
+    public float? Elevation { get; set; }
+    /// <summary>Where the model meets the water, for the water renderer (waterline foam, lee, surf). Empty: none.</summary>
+    public List<WaterFootprint> Water { get; set; } = new();
+}
+
+/// <summary>
+/// One piece of a placed model's waterline. Position and sizes are in the model's own units (they follow the
+/// placement's position, rotation and scale); heights are world metres from sea level.
+/// </summary>
+public sealed class WaterFootprint
+{
+    /// <summary>circle (rock, post), box (pier block) or hull (floating, waves run under it).</summary>
+    public string Shape { get; set; } = "circle";
+    /// <summary>Centre in model x, z.</summary>
+    public float[] At { get; set; } = { 0f, 0f };
+    public float Radius { get; set; } = 0.5f;
+    public float Length { get; set; } = 1f;
+    public float Beam { get; set; } = 1f;
+    /// <summary>Degrees around y, added to the placement's rotation; 0 runs the length along model +x.</summary>
+    public float Heading { get; set; }
+    public float Top { get; set; } = 1f;
+    /// <summary>Hulls: how deep they reach.</summary>
+    public float Draft { get; set; } = 1f;
+    /// <summary>Slope around a grounded footprint's foot (rock debris).</summary>
+    public float Skirt { get; set; }
+    /// <summary>How far (world metres) its foam, surf and swash reach out from the waterline; 0 lets the water decide by size.</summary>
+    public float Reach { get; set; }
 }
 
 /// <summary>The authored silhouette: island falloff, height stamps and noise detail.</summary>
@@ -167,6 +198,10 @@ public sealed class FalloffDefinition
     public float CoastNoise { get; set; } = 0.06f;
     public float LandHeight { get; set; } = 1.2f;
     public float SeaDepth { get; set; } = -6f;
+    /// <summary>Sea bed at the map border: past the coast the shelf drops to it, so the water deepens out to open sea.</summary>
+    public float OpenSeaDepth { get; set; } = -30f;
+    /// <summary>How far past the coast the shelf reaches open-sea depth, as a fraction of the map size; 0 = at the map border.</summary>
+    public float Shelf { get; set; }
 }
 
 public enum StampKind { Mountain, Hill, Plateau, Valley, Cove }

@@ -13,13 +13,17 @@ internal sealed class Placements
 {
     readonly Node3D _parent;
     readonly List<Node3D> _nodes = new();
+    readonly Dictionary<string, Node3D> _byId = new();
 
     public Placements(Node3D parent) => _parent = parent;
+
+    public Node3D Node(string id) => _byId.GetValueOrDefault(id);
 
     public void Build(WorldData w, IReadOnlyList<PlacementDefinition> placements)
     {
         foreach (var n in _nodes) n.QueueFree();
         _nodes.Clear();
+        _byId.Clear();
 
         foreach (var p in placements)
         {
@@ -41,11 +45,14 @@ internal sealed class Placements
             var (low, high) = w.FootprintRange(p.Cell[0], p.Cell[1], p.Cells[0], p.Cells[1]);
             var basis = new Basis(Vector3.Up, Mathf.DegToRad(p.Rotation)).Scaled(Vector3.One * scale);
             var centre = new Vector3((p.Cell[0] + p.Cells[0] * 0.5f) * w.CellSize, low, (p.Cell[1] + p.Cells[1] * 0.5f) * w.CellSize);
-            // move the model's bounds centre over the footprint centre and its bottom onto the ground
-            var offset = basis * new Vector3(bounds.GetCenter().X, bounds.Position.Y, bounds.GetCenter().Z);
+            // move the model's bounds centre over the footprint centre and its bottom onto the ground (or its origin to
+            // the given elevation)
+            if (p.Elevation is { } y) centre.Y = y;
+            var offset = basis * new Vector3(bounds.GetCenter().X, p.Elevation.HasValue ? 0 : bounds.Position.Y, bounds.GetCenter().Z);
             node.Transform = new Transform3D(basis, centre - offset);
             _parent.AddChild(node);
             _nodes.Add(node);
+            if (!string.IsNullOrEmpty(p.Id)) _byId[p.Id] = node;
 
             GD.Print($"[Terrain] placed '{node.Name}': model {bounds.Size.X:F2} x {bounds.Size.Y:F2} x {bounds.Size.Z:F2} m, " +
                      $"scale {scale:F2}, footprint {foot.X:F0} x {foot.Y:F0} m, ground {low:F2}..{high:F2} m");

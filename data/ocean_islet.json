@@ -1,0 +1,13 @@
+{
+  // a sheltered sea: low swell and chop so a small island isn't swamped by waves its own size
+  "cascades": [
+    { "windSpeed": 7, "heightScale": 0.5 },
+    { "windSpeed": 6, "heightScale": 0.6 },
+    {}
+  ],
+  // shore and body foam use the ocean's own defaults; only the water is less clear, so deep water reads deep
+  "surface": {
+    "absorption_distance": 4,
+    "depth_scale": 4
+  }
+}

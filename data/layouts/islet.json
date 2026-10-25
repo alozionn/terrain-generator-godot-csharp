@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "id": "islet",
+  // a small round island with a gentle rise in the middle; the sea stack off its south shore is a placed model
+  "falloff": { "kind": "island", "radius": 0.15, "edge": 0.05, "coastNoise": 0.025, "landHeight": 1.0, "seaDepth": -4, "openSeaDepth": -25, "shelf": 0.09 },
+  "stamps": [
+    { "type": "hill", "at": [0.5, 0.47], "radius": 16, "height": 1.5 }
+  ],
+  "detail": { "amplitude": 0.6, "frequency": 0.05, "octaves": 3, "warp": 6 },
+  "erosion": { "strength": 2.5, "gullyWeight": 0.5, "frequency": 0.12, "octaves": 4, "gain": 0.5, "detail": 1.5,
+               "slopeStart": 0.25, "assumedSlope": 0.8, "valleyHeight": 2 }
+}

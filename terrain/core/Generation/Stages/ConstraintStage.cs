@@ -46,6 +46,7 @@ public static class ConstraintStage
                 issues.Add($"placement '{p.Id}' reaches outside the map");
                 continue;
             }
+            if (p.Elevation.HasValue) continue; // on the water, not on the board
             int decor = 0;
             for (int cz = oz; cz < oz + p.Cells[1]; cz++)
                 for (int cx = ox; cx < ox + p.Cells[0]; cx++)

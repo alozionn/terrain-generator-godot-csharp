@@ -1,0 +1,69 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" uid="uid://dvspx3bpv06rp" path="res://demo/DemoRoot.cs" id="1"]
+[ext_resource type="Script" uid="uid://bjy5d5rgg6xex" path="res://terrain/Terrain.cs" id="2"]
+[ext_resource type="PackedScene" path="res://ocean/ocean.tscn" id="3"]
+
+[sub_resource type="ProceduralSkyMaterial" id="sky_mat"]
+sky_top_color = Color(0.32, 0.55, 0.85, 1)
+sky_horizon_color = Color(0.72, 0.82, 0.92, 1)
+ground_bottom_color = Color(0.2, 0.3, 0.45, 1)
+ground_horizon_color = Color(0.72, 0.82, 0.92, 1)
+
+[sub_resource type="Sky" id="sky"]
+sky_material = SubResource("sky_mat")
+radiance_size = 2
+
+[sub_resource type="Environment" id="env"]
+background_mode = 2
+sky = SubResource("sky")
+ambient_light_source = 3
+reflected_light_source = 2
+tonemap_mode = 3
+tonemap_white = 6.0
+ssao_enabled = true
+fog_enabled = true
+fog_light_color = Color(0.7, 0.8, 0.9, 1)
+fog_density = 0.0003
+fog_aerial_perspective = 1.0
+fog_sky_affect = 0.0
+
+[node name="DemoRoot" type="Node3D" unique_id=785137869]
+script = ExtResource("1")
+Yaw = 35.0
+Pitch = 34.0
+Zoom = 0.42
+Grid = false
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=1086230798]
+environment = SubResource("env")
+
+[node name="Sun" type="DirectionalLight3D" parent="." unique_id=991996299]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 50, 0)
+light_energy = 1.2
+shadow_enabled = true
+directional_shadow_mode = 1
+directional_shadow_max_distance = 250.0
+
+[node name="Terrain" type="Node3D" parent="." unique_id=217480071 node_paths=PackedStringArray("Sun", "Environment")]
+script = ExtResource("2")
+Sun = NodePath("../Sun")
+Environment = NodePath("../WorldEnvironment")
+LevelPath = "res://data/levels/islet.json"
+
+[node name="Ocean" parent="." unique_id=1350192061 instance=ExtResource("3")]
+ConfigPath = "res://data/ocean_islet.json"
+
+[node name="Camera" type="Camera3D" parent="." unique_id=236530023]
+fov = 50.0
+
+[node name="Ui" type="CanvasLayer" parent="." unique_id=1410388208]
+
+[node name="Info" type="Label" parent="Ui" unique_id=1298181135]
+offset_left = 12.0
+offset_top = 10.0
+offset_right = 700.0
+offset_bottom = 90.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4

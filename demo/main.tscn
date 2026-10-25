@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://dvspx3bpv06rp" path="res://demo/DemoRoot.cs" id="1"]
 [ext_resource type="Script" uid="uid://bjy5d5rgg6xex" path="res://terrain/Terrain.cs" id="2"]
+[ext_resource type="PackedScene" path="res://ocean/ocean.tscn" id="3"]
 
 [sub_resource type="ProceduralSkyMaterial" id="sky_mat"]
 sky_top_color = Color(0.32, 0.55, 0.85, 1)
@@ -27,14 +28,6 @@ fog_density = 0.0003
 fog_aerial_perspective = 1.0
 fog_sky_affect = 0.0
 
-[sub_resource type="PlaneMesh" id="sea"]
-size = Vector2(4000, 4000)
-
-[sub_resource type="StandardMaterial3D" id="sea_mat"]
-transparency = 1
-albedo_color = Color(0.16, 0.42, 0.62, 0.78)
-roughness = 0.15
-
 [node name="DemoRoot" type="Node3D" unique_id=785137869]
 script = ExtResource("1")
 
@@ -53,10 +46,8 @@ script = ExtResource("2")
 Sun = NodePath("../Sun")
 Environment = NodePath("../WorldEnvironment")
 
-[node name="SeaPlaceholder" type="MeshInstance3D" parent="." unique_id=1350192061]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 100, 0, 100)
-mesh = SubResource("sea")
-surface_material_override/0 = SubResource("sea_mat")
+[node name="Ocean" parent="." unique_id=1350192061 instance=ExtResource("3")]
+ConfigPath = "res://data/ocean.json"
 
 [node name="Camera" type="Camera3D" parent="." unique_id=236530023]
 fov = 50.0

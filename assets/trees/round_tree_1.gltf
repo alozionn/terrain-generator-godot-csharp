@@ -1,0 +1,301 @@
+{
+ "asset": {
+  "generator": "Khronos glTF Blender I/O v5.2.40",
+  "version": "2.0"
+ },
+ "scene": 0,
+ "scenes": [
+  {
+   "name": "Scene",
+   "nodes": [
+    0
+   ]
+  }
+ ],
+ "nodes": [
+  {
+   "mesh": 0,
+   "name": "RoundTree"
+  }
+ ],
+ "materials": [
+  {
+   "doubleSided": true,
+   "name": "Bark",
+   "pbrMetallicRoughness": {
+    "baseColorFactor": [
+     0.1599999964237213,
+     0.10999999940395355,
+     0.07999999821186066,
+     1
+    ],
+    "metallicFactor": 0,
+    "roughnessFactor": 0.8999999761581421
+   }
+  },
+  {
+   "doubleSided": true,
+   "name": "Leaves_Core",
+   "pbrMetallicRoughness": {
+    "baseColorFactor": [
+     0.07500000298023224,
+     0.17000000178813934,
+     0.04500000178813934,
+     1
+    ],
+    "metallicFactor": 0,
+    "roughnessFactor": 0.8999999761581421
+   }
+  },
+  {
+   "alphaMode": "MASK",
+   "doubleSided": true,
+   "name": "Leaves",
+   "pbrMetallicRoughness": {
+    "baseColorTexture": {
+     "index": 0
+    },
+    "metallicFactor": 0,
+    "roughnessFactor": 0.8999999761581421
+   },
+   "alphaCutoff": 0.5
+  }
+ ],
+ "meshes": [
+  {
+   "name": "RoundTree",
+   "primitives": [
+    {
+     "attributes": {
+      "POSITION": 0,
+      "NORMAL": 1,
+      "TEXCOORD_0": 2
+     },
+     "indices": 3,
+     "material": 0
+    },
+    {
+     "attributes": {
+      "POSITION": 4,
+      "NORMAL": 5,
+      "TEXCOORD_0": 6
+     },
+     "indices": 7,
+     "material": 1
+    },
+    {
+     "attributes": {
+      "POSITION": 8,
+      "NORMAL": 9,
+      "TEXCOORD_0": 10
+     },
+     "indices": 11,
+     "material": 2
+    }
+   ]
+  }
+ ],
+ "textures": [
+  {
+   "sampler": 0,
+   "source": 0
+  }
+ ],
+ "images": [
+  {
+   "mimeType": "image/png",
+   "name": "leaf_clump",
+   "uri": "leaf_clump.png"
+  }
+ ],
+ "accessors": [
+  {
+   "bufferView": 0,
+   "componentType": 5126,
+   "count": 415,
+   "max": [
+    1.102068543434143,
+    3.581350564956665,
+    0.7872822284698486
+   ],
+   "min": [
+    -0.820042610168457,
+    0.04021599888801575,
+    -1.063897728919983
+   ],
+   "type": "VEC3"
+  },
+  {
+   "bufferView": 1,
+   "componentType": 5126,
+   "count": 415,
+   "type": "VEC3"
+  },
+  {
+   "bufferView": 2,
+   "componentType": 5126,
+   "count": 415,
+   "type": "VEC2"
+  },
+  {
+   "bufferView": 3,
+   "componentType": 5123,
+   "count": 2442,
+   "type": "SCALAR"
+  },
+  {
+   "bufferView": 4,
+   "componentType": 5126,
+   "count": 294,
+   "max": [
+    2.1742708683013916,
+    6.9120001792907715,
+    2.006622791290283
+   ],
+   "min": [
+    -2.249206066131592,
+    2.8710570335388184,
+    -2.245447874069214
+   ],
+   "type": "VEC3"
+  },
+  {
+   "bufferView": 5,
+   "componentType": 5126,
+   "count": 294,
+   "type": "VEC3"
+  },
+  {
+   "bufferView": 6,
+   "componentType": 5126,
+   "count": 294,
+   "type": "VEC2"
+  },
+  {
+   "bufferView": 7,
+   "componentType": 5123,
+   "count": 1680,
+   "type": "SCALAR"
+  },
+  {
+   "bufferView": 8,
+   "componentType": 5126,
+   "count": 172,
+   "max": [
+    2.5839521884918213,
+    7.3322834968566895,
+    2.540165662765503
+   ],
+   "min": [
+    -2.7884552478790283,
+    2.475053310394287,
+    -2.85351824760437
+   ],
+   "type": "VEC3"
+  },
+  {
+   "bufferView": 9,
+   "componentType": 5126,
+   "count": 172,
+   "type": "VEC3"
+  },
+  {
+   "bufferView": 10,
+   "componentType": 5126,
+   "count": 172,
+   "type": "VEC2"
+  },
+  {
+   "bufferView": 11,
+   "componentType": 5123,
+   "count": 258,
+   "type": "SCALAR"
+  }
+ ],
+ "bufferViews": [
+  {
+   "buffer": 0,
+   "byteLength": 4980,
+   "byteOffset": 0,
+   "target": 34962
+  },
+  {
+   "buffer": 0,
+   "byteLength": 4980,
+   "byteOffset": 4980,
+   "target": 34962
+  },
+  {
+   "buffer": 0,
+   "byteLength": 3320,
+   "byteOffset": 9960,
+   "target": 34962
+  },
+  {
+   "buffer": 0,
+   "byteLength": 4884,
+   "byteOffset": 13280,
+   "target": 34963
+  },
+  {
+   "buffer": 0,
+   "byteLength": 3528,
+   "byteOffset": 18164,
+   "target": 34962
+  },
+  {
+   "buffer": 0,
+   "byteLength": 3528,
+   "byteOffset": 21692,
+   "target": 34962
+  },
+  {
+   "buffer": 0,
+   "byteLength": 2352,
+   "byteOffset": 25220,
+   "target": 34962
+  },
+  {
+   "buffer": 0,
+   "byteLength": 3360,
+   "byteOffset": 27572,
+   "target": 34963
+  },
+  {
+   "buffer": 0,
+   "byteLength": 2064,
+   "byteOffset": 30932,
+   "target": 34962
+  },
+  {
+   "buffer": 0,
+   "byteLength": 2064,
+   "byteOffset": 32996,
+   "target": 34962
+  },
+  {
+   "buffer": 0,
+   "byteLength": 1376,
+   "byteOffset": 35060,
+   "target": 34962
+  },
+  {
+   "buffer": 0,
+   "byteLength": 516,
+   "byteOffset": 36436,
+   "target": 34963
+  }
+ ],
+ "samplers": [
+  {
+   "magFilter": 9729,
+   "minFilter": 9987
+  }
+ ],
+ "buffers": [
+  {
+   "byteLength": 36952,
+   "uri": "round_tree_1.bin"
+  }
+ ]
+}

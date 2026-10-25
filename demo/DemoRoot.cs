@@ -12,6 +12,12 @@ public partial class DemoRoot : Node3D
     static readonly string[] Palettes = { "meadow", "dusk_bloom" };
     static readonly string[] Lightings = { "default", "golden", "pastel" };
 
+    // starting view: orbit angles in degrees, distance as a fraction of the map size
+    [Export] public float Yaw { get; set; } = 35f;
+    [Export] public float Pitch { get; set; } = 48f;
+    [Export] public float Zoom { get; set; } = 0.75f;
+    [Export] public bool Grid { get; set; } = true;
+
     Terrain _terrain;
     Camera3D _camera;
     Label _info;
@@ -30,6 +36,8 @@ public partial class DemoRoot : Node3D
         _camera = GetNode<Camera3D>("Camera");
         _info = GetNode<Label>("Ui/Info");
         _terrain.Generated += OnGenerated;
+        (_yaw, _pitch) = (Yaw, Pitch);
+        _terrain.ShowGrid = Grid;
         GetNodeOrNull("/root/DebugMenu")?.Set("style", 1); // compact FPS readout (F3 cycles)
         OnGenerated();
 
@@ -68,12 +76,67 @@ public partial class DemoRoot : Node3D
     {
         if (_terrain.World == null) return;
         _focus = new Vector3(_terrain.World.Size * 0.5f, 0, _terrain.World.Size * 0.5f);
-        _distance = _terrain.World.Size * 0.75f;
+        _distance = _terrain.World.Size * Zoom;
         _palette = Math.Max(0, Array.IndexOf(Palettes, _terrain.Level.Palette));
         UpdateCamera();
+        // the vendored ocean calms its waves, adds surf and tints the shallows from the ground under it
+        var ocean = GetNodeOrNull<global::Ocean.Ocean>("Ocean");
+        var w = _terrain.World;
+        if (ocean != null)
+        {
+            ocean.SetSeaFloor(global::Ocean.Core.Shore.SeaFloor.FromHeights(w.Height, w.Samples, w.Samples, w.SampleSpacing,
+                System.Numerics.Vector2.Zero, seaLevel: ocean.GlobalPosition.Y));
+            ocean.ClearBodies();
+            foreach (var body in WaterBodies()) ocean.AddBody(body);
+            AddFloaters(ocean);
+        }
         string issues = _terrain.Issues.Count == 0 ? "no issues" : string.Join("\n", _terrain.Issues);
         _info.Text = $"{_terrain.Level.Id}  seed {_terrain.Level.Seed}  palette {_terrain.Level.Palette}\n{issues}\n" +
                      "R reroll · P palette · L lighting · G grid · RMB orbit · MMB pan · wheel zoom";
+    }
+
+    /// <summary>The placements' waterline footprints, moved with their placed models, as the ocean's bodies.</summary>
+    System.Collections.Generic.IEnumerable<global::Ocean.Core.Bodies.WaterBody> WaterBodies()
+    {
+        foreach (var p in _terrain.Level.Placements)
+        {
+            var node = _terrain.PlacedNode(p.Id);
+            if (node == null) continue;
+            var xf = node.GlobalTransform;
+            float scale = xf.Basis.Scale.X, yaw = node.GlobalRotation.Y;
+            foreach (var f in p.Water)
+            {
+                var c = xf * new Vector3(f.At[0], 0, f.At[1]);
+                var xz = new System.Numerics.Vector2(c.X, c.Z);
+                float heading = yaw + Mathf.DegToRad(f.Heading);
+                var body = f.Shape switch
+                {
+                    "box" => global::Ocean.Core.Bodies.WaterBody.Box(xz, heading, f.Length * scale, f.Beam * scale, f.Top),
+                    "hull" => global::Ocean.Core.Bodies.WaterBody.Hull(xz, heading, f.Length * scale, f.Beam * scale, f.Draft, f.Top),
+                    _ => global::Ocean.Core.Bodies.WaterBody.Circle(xz, f.Radius * scale, f.Top),
+                };
+                if (f.Shape != "hull") body.Skirt = f.Skirt;
+                body.Reach = f.Reach;
+                yield return body;
+            }
+        }
+    }
+
+    /// <summary>Placements with a hull footprint ride the water (a fresh floater on each newly placed model).</summary>
+    void AddFloaters(global::Ocean.Ocean ocean)
+    {
+        foreach (var p in _terrain.Level.Placements)
+        {
+            var node = _terrain.PlacedNode(p.Id);
+            var hull = p.Water.Find(f => f.Shape == "hull");
+            if (node == null || hull == null) continue;
+            float scale = node.GlobalTransform.Basis.Scale.X, heading = node.GlobalRotation.Y + Mathf.DegToRad(hull.Heading);
+            node.AddChild(new Floater
+            {
+                Water = ocean, Axis = new Vector3(Mathf.Cos(heading), 0, -Mathf.Sin(heading)),
+                Length = hull.Length * scale, Beam = hull.Beam * scale,
+            });
+        }
     }
 
     public override void _Process(double delta)

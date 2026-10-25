@@ -16,6 +16,7 @@
     { "id": "tree_common_3", "scene": "res://assets/nature/CommonTree_3.gltf", "wind": 0.15, "stiffness": 0.9, "range": 450, "bakedShadow": true, "shadowDensity": 0.8 },
     { "id": "tree_common_4", "scene": "res://assets/nature/CommonTree_4.gltf", "wind": 0.15, "stiffness": 0.9, "range": 450, "bakedShadow": true, "shadowDensity": 0.8 },
     { "id": "tree_common_5", "scene": "res://assets/nature/CommonTree_5.gltf", "wind": 0.15, "stiffness": 0.9, "range": 450, "bakedShadow": true, "shadowDensity": 0.8 },
+    { "id": "round_tree_1", "scene": "res://assets/trees/round_tree_1.gltf", "wind": 0.15, "stiffness": 0.9, "leafNormals": 0, "range": 450, "bakedShadow": true, "shadowDensity": 1.0 },
     { "id": "pine_1", "scene": "res://assets/nature/Pine_1.gltf", "wind": 0.12, "stiffness": 0.9, "range": 450, "bakedShadow": true, "shadowDensity": 1.0 },
     { "id": "pine_2", "scene": "res://assets/nature/Pine_2.gltf", "wind": 0.12, "stiffness": 0.9, "range": 450, "bakedShadow": true, "shadowDensity": 1.0 },
     { "id": "pine_3", "scene": "res://assets/nature/Pine_3.gltf", "wind": 0.12, "stiffness": 0.9, "range": 450, "bakedShadow": true, "shadowDensity": 1.0 },

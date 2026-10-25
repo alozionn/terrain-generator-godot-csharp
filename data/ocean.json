@@ -1,0 +1,7 @@
+{
+  // shore foam, surf and swash use the ocean's own defaults; only the water is less clear, so deep water reads deep
+  "surface": {
+    "absorption_distance": 4,
+    "depth_scale": 4
+  }
+}

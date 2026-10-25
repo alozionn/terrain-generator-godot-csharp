@@ -41,7 +41,7 @@ public class FoliageTests
     public async Task VariantsAreAllUsed()
     {
         var (_, foliage, _) = Run();
-        foreach (var mesh in new[] { "tree_common_1", "tree_common_3", "tree_common_5" })
+        foreach (var mesh in new[] { "pine_1", "pine_3", "pine_5" })
             await Assert.That(foliage.ByMesh[mesh].Count).IsGreaterThan(0);
     }
 

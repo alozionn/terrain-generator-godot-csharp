@@ -6,7 +6,7 @@
   "ground": { "bands": ["grass", "meadow", "hill"], "tint": "#f4ffe0", "patches": "dirt",
               "patchAmount": 0.6, "patchFrequency": 0.05, "patchThreshold": 0.45 },
   "species": [
-    { "id": "oaks", "meshes": ["tree_common_1", "tree_common_2", "tree_common_3", "tree_common_4", "tree_common_5"],
+    { "id": "oaks", "meshes": ["round_tree_1"],
       "density": 0.8, "spacing": 8, "footprint": 3, "bands": ["grass", "meadow", "hill"], "height": [1.2, 8], "maxSlope": 25,
       "playableMargin": 3, "scale": [0.8, 1.15], "tilt": 3, "tintJitter": 0.08 },
     { "id": "bushes", "meshes": ["bush", "bush", "bush_flowers"], "density": 2, "spacing": 3, "footprint": 1,
