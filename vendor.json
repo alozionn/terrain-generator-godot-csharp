@@ -1,8 +1,0 @@
-{
-    "ocean":  {
-                  "repo":  "https://github.com/alozionn/ocean-renderer-godot-csharp.git",
-                  "ref":  "a382087ac1656e9d9be0d4336c6c24338acd9c46",
-                  "path":  "ocean",
-                  "dest":  "ocean"
-              }
-}
