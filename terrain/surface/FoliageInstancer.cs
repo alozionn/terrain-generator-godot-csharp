@@ -40,7 +40,7 @@ internal sealed class FoliageInstancer
         _proxies.Clear();
         foreach (var def in set.Meshes)
         {
-            var lods = FoliageMeshes.Lods(def);
+            var lods = FoliageMeshes.Lods(def, set.ColorSchemes.GetValueOrDefault(def.Colors));
             if (lods.Count > 0) _meshes[def.Id] = (def, lods, FoliageMeshes.LodEnds(def, lods.Count, ChunkSize * 0.71f));
             if (FoliageMeshes.Proxies(def) is { Length: > 0 } proxies) _proxies[def.Id] = proxies;
         }

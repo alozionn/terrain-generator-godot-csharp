@@ -33,7 +33,12 @@ internal sealed class GroundRenderer
         _material.SetShaderParameter("albedo_height", textures.AlbedoArray);
         _material.SetShaderParameter("normal_rough", textures.NormalArray);
         _material.SetShaderParameter("uv_scale", textures.UvScales);
+        _material.SetShaderParameter("strata", textures.Strata);
+        _material.SetShaderParameter("strata_shade", textures.StrataShade);
         _material.SetShaderParameter("texture_count", textures.Count);
+        _material.SetShaderParameter("detail_bias", textures.MipBias);
+        _material.SetShaderParameter("normal_strength", textures.NormalStrength);
+        _material.SetShaderParameter("blend_depth", textures.BlendDepth);
 
         var weights = Weights(w, g);
         for (int z0 = 0; z0 < w.Samples - 1; z0 += ChunkQuads)

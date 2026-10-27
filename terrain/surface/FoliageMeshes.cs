@@ -49,9 +49,9 @@ internal static class FoliageMeshes
         return ends;
     }
 
-    public static List<Mesh> Lods(FoliageMeshDefinition def)
+    public static List<Mesh> Lods(FoliageMeshDefinition def, IReadOnlyDictionary<string, string> colors = null)
     {
-        if (!def.Scene.StartsWith("procedural:")) return SceneMeshes(def);
+        if (!def.Scene.StartsWith("procedural:")) return SceneMeshes(def, colors);
 
         var color = ToColor(def.Color);
         var lods = new List<Mesh>();
@@ -93,7 +93,7 @@ internal static class FoliageMeshes
         return lods;
     }
 
-    static List<Mesh> SceneMeshes(FoliageMeshDefinition def)
+    static List<Mesh> SceneMeshes(FoliageMeshDefinition def, IReadOnlyDictionary<string, string> colors)
     {
         var lods = new List<Mesh>();
         if (!ResourceLoader.Exists(def.Scene))
@@ -104,12 +104,30 @@ internal static class FoliageMeshes
         var root = GD.Load<PackedScene>(def.Scene).Instantiate();
         void Collect(Node n)
         {
-            if (n is MeshInstance3D { Mesh: { } m }) lods.Add(def.Wind > 0 || def.Fade ? WithWind(def, m) : m);
+            if (n is MeshInstance3D { Mesh: { } m })
+            {
+                if (colors is { Count: > 0 }) m = Recoloured(m, colors);
+                lods.Add(def.Wind > 0 || def.Fade ? WithWind(def, m) : m);
+            }
             foreach (var c in n.GetChildren()) Collect(c);
         }
         Collect(root);
         root.Free();
         return lods;
+    }
+
+    /// <summary>A copy of the mesh whose surfaces take the scheme's colour for their material's name.</summary>
+    static Mesh Recoloured(Mesh source, IReadOnlyDictionary<string, string> colors)
+    {
+        var mesh = (Mesh)source.Duplicate();
+        for (int s = 0; s < mesh.GetSurfaceCount(); s++)
+            if (source.SurfaceGetMaterial(s) is BaseMaterial3D src && colors.TryGetValue(src.ResourceName ?? "", out var hex))
+            {
+                var m = (BaseMaterial3D)src.Duplicate();
+                m.AlbedoColor = ToColor(hex);
+                mesh.SurfaceSetMaterial(s, m);
+            }
+        return mesh;
     }
 
     /// <summary>

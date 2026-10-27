@@ -11,9 +11,12 @@ shader_type spatial;
 uniform sampler2DArray albedo_height : source_color, filter_linear_mipmap_anisotropic, repeat_enable;
 uniform sampler2DArray normal_rough : hint_normal, filter_linear_mipmap_anisotropic, repeat_enable;
 uniform float uv_scale[8];
+uniform float strata[8]; // rock layers per metre of height on steep ground (0 = none)
+uniform float strata_shade[8]; // how much each layer lightens or darkens
 uniform int texture_count = 1;
 uniform float blend_depth : hint_range(0.01, 1.0) = 0.2; // smaller = crisper height-blend edges
 uniform float normal_strength : hint_range(0.0, 2.0) = 1.0;
+uniform float detail_bias : hint_range(0.0, 6.0) = 0.0; // mip bias: keeps a texture's colours, drops its fine detail
 group_uniforms cover;
 uniform vec2 cover_fade = vec2(25.0, 140.0); // metres where cover goes from cover_near to full
 uniform float cover_near : hint_range(0.0, 1.0) = 0.3;
@@ -42,14 +45,21 @@ void sample_texture(int i, vec3 tri, out vec4 alb, out vec4 nrm) {
 	float s = uv_scale[i];
 	if (tri.y > 0.96) {
 		vec3 uv = vec3(local_pos.xz * s, float(i));
-		alb = texture(albedo_height, uv);
-		nrm = texture(normal_rough, uv);
+		alb = texture(albedo_height, uv, detail_bias);
+		nrm = texture(normal_rough, uv, detail_bias);
 		return;
 	}
 	vec3 a = vec3(local_pos.zy * s, float(i)), b = vec3(local_pos.xz * s, float(i)), c = vec3(local_pos.xy * s, float(i));
-	alb = texture(albedo_height, a) * tri.x + texture(albedo_height, b) * tri.y + texture(albedo_height, c) * tri.z;
+	alb = texture(albedo_height, a, detail_bias) * tri.x + texture(albedo_height, b, detail_bias) * tri.y + texture(albedo_height, c, detail_bias) * tri.z;
 	// side projections reuse the tangent-space normal as is: not exact, but at board distance it reads as rock
-	nrm = texture(normal_rough, a) * tri.x + texture(normal_rough, b) * tri.y + texture(normal_rough, c) * tri.z;
+	nrm = texture(normal_rough, a, detail_bias) * tri.x + texture(normal_rough, b, detail_bias) * tri.y + texture(normal_rough, c, detail_bias) * tri.z;
+	if (strata[i] > 0.0) {
+		// flat-shaded layers, wavy so they follow no grid: cliffs read as stacked stone instead of a stretched texture
+		float warp = (alb.a - 0.5) * 0.8 + sin(local_pos.x * 0.13 + local_pos.z * 0.09) * 0.7 + sin(local_pos.z * 0.31 - local_pos.x * 0.07) * 0.3;
+		float layer = floor(local_pos.y * strata[i] + warp);
+		float shade = fract(sin(layer * 12.9898) * 43758.5453) * 2.0 - 1.0;
+		alb.rgb *= 1.0 + shade * strata_shade[i] * smoothstep(0.95, 0.75, normalize(local_normal).y);
+	}
 }
 
 void fragment() {

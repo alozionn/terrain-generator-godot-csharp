@@ -80,11 +80,11 @@ public class BiomeTests
     {
         var (w, level, sets, _) = Generate();
         var foliage = FoliageStage.Run(w, sets, level.Seed);
-        var forest = sets.First(s => s.Id == "forest");
-        int biome = Array.IndexOf(w.BiomeIds, "forest");
+        var forest = sets.First(s => s.Id == "kenney_forest");
+        int biome = Array.IndexOf(w.BiomeIds, "kenney_forest");
         float reach = w.RegionBlend + w.SampleSpacing;
-        // ferns and mushrooms grow only in the forest set: each must stand in forest, or within the border blend of it
-        var meshes = forest.Species.Where(s => s.Id is "ferns" or "mushrooms").SelectMany(s => s.Meshes).Distinct().ToList();
+        // mushrooms and violets grow only in the forest set: each must stand in forest, or within the border blend of it
+        var meshes = forest.Species.Where(s => s.Id is "violets" or "mushrooms").SelectMany(s => s.Meshes).Distinct().ToList();
         int count = 0;
         foreach (var mesh in meshes)
             foreach (var f in foliage.ByMesh.TryGetValue(mesh, out var l) ? l : [])

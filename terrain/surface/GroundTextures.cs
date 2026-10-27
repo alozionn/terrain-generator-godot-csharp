@@ -30,10 +30,16 @@ internal sealed class GroundTextures
     public Texture2DArray NormalArray { get; private set; }
     /// <summary>Repeats per metre, padded to <see cref="MaxTextures"/>.</summary>
     public float[] UvScales { get; private set; } = new float[MaxTextures];
+    /// <summary>Rock layers per metre and their shade, padded to <see cref="MaxTextures"/>.</summary>
+    public float[] Strata { get; private set; } = new float[MaxTextures];
+    public float[] StrataShade { get; private set; } = new float[MaxTextures];
+    public float MipBias { get; private set; }
+    public float NormalStrength { get; private set; } = 1f;
+    public float BlendDepth { get; private set; } = 0.2f;
 
     public static GroundTextures Load(TextureSetDefinition set)
     {
-        var t = new GroundTextures();
+        var t = new GroundTextures { MipBias = set.MipBias, NormalStrength = set.NormalStrength, BlendDepth = set.BlendDepth };
         if (set.Textures.Count > MaxTextures) GD.PushWarning($"[Terrain] {set.Textures.Count} ground textures; only the first {MaxTextures} are used");
 
         int size = 0;
@@ -64,6 +70,8 @@ internal sealed class GroundTextures
             }
             t._ids[def.Id] = t._entries.Count;
             t.UvScales[t._entries.Count] = def.UvScale;
+            t.Strata[t._entries.Count] = def.Strata;
+            t.StrataShade[t._entries.Count] = def.StrataShade;
             t._entries.Add((def.Id, alb, nrm, def.UvScale));
         }
 

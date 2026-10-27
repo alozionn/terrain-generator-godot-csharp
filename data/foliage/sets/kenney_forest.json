@@ -1,0 +1,34 @@
+{
+  "version": 1,
+  "id": "kenney_forest",
+  // forest.json with Kenney Nature Kit trees, bushes, mushrooms, stumps and logs.
+  "climate": { "temperature": [0.3, 0.75], "moisture": [0.48, 1.0] },
+  "ground": { "bands": ["grass", "meadow", "hill"], "tint": "#c4d4a0", "patches": "litter",
+              "patchAmount": 0.85, "patchFrequency": 0.07, "patchThreshold": -0.05 },
+  "species": [
+    { "id": "oaks", "meshes": ["k_oak", "k_default", "k_detailed", "k_plateau", "k_fat"],
+      "density": 9, "spacing": 4, "footprint": 0.4, "bands": ["grass", "meadow", "hill"], "height": [1.2, 9], "maxSlope": 28,
+      "playableMargin": 3, "scale": [5.5, 7.5], "tilt": 3, "tintJitter": 0.06,
+      "clusters": { "frequency": 0.03, "threshold": -0.35, "softness": 0.3 } },
+    { "id": "deadwood", "meshes": ["k_stump", "k_stump_round", "k_log"], "density": 0.6, "spacing": 6, "footprint": 0.28,
+      "bands": ["grass", "meadow", "hill"], "height": [1.0, 9], "maxSlope": 25, "playableMargin": 2,
+      "scale": [3.5, 5], "tintJitter": 0.05 },
+    { "id": "bushes", "meshes": ["k_bush", "k_bush_detailed", "k_bush_large"], "density": 5, "spacing": 2.5, "footprint": 0.22,
+      "bands": ["grass", "meadow", "hill"], "height": [1.0, 9], "maxSlope": 30, "playableMargin": 1,
+      "scale": [3.5, 5.5], "tintJitter": 0.06, "clusters": { "frequency": 0.05, "threshold": -0.1, "softness": 0.3 } },
+    { "id": "mushrooms", "meshes": ["k_mushroom_red", "k_mushroom_red_group", "k_mushroom_tan_group"], "density": 5, "spacing": 1.5,
+      "bands": ["grass", "meadow", "hill"], "height": [1.0, 9], "maxSlope": 30, "playableMargin": 1,
+      "scale": [1.6, 2.4], "tintJitter": 0.06, "clusters": { "frequency": 0.12, "threshold": 0.1, "softness": 0.2 } },
+    { "id": "violets", "meshes": ["k_flower_purple_a", "k_flower_purple_b"], "density": 20, "spacing": 0.9,
+      "bands": ["grass", "meadow", "hill"], "height": [1.0, 8], "maxSlope": 25, "playableMargin": 1,
+      "scale": [2.0, 2.6], "tilt": 6, "clusters": { "frequency": 0.07, "threshold": 0.4, "softness": 0.15 } },
+    { "id": "forest_grass", "meshes": ["k_grass", "k_grass_leafs_large"], "density": 25, "spacing": 0.9,
+      "bands": ["grass", "meadow", "hill"], "height": [1.0, 9], "maxSlope": 35, "avoidPlayable": false,
+      "playableDensity": 0.6, "playableScale": 0.8, "scale": [1.8, 2.6], "tilt": 8, "tintJitter": 0.08,
+      "clusters": { "frequency": 0.05, "threshold": -0.3, "softness": 0.4 }, "cover": "#5f7f32", "coverArea": 0.3 },
+    { "id": "forest_blades", "mesh": "grass_forest", "density": 120, "spacing": 0.6,
+      "bands": ["grass", "meadow", "hill"], "height": [1.0, 9], "maxSlope": 35, "avoidPlayable": false,
+      "playableDensity": 1.0, "playableScale": 0.8, "scale": [0.8, 1.2], "tilt": 8, "tintJitter": 0.1,
+      "clusters": { "frequency": 0.05, "threshold": -0.3, "softness": 0.4 } }
+  ]
+}

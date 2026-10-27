@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "id": "kenney_heath",
+  // heath.json with Kenney Nature Kit autumn trees, stumps and bushes; the generated golden grass stays.
+  "climate": { "temperature": [0.55, 1.0], "moisture": [0.0, 0.48] },
+  "ground": { "bands": ["grass", "meadow", "hill"], "tint": "#f2e4b8", "patches": "dry",
+              "patchAmount": 0.85, "patchFrequency": 0.05, "patchThreshold": -0.1 },
+  "species": [
+    { "id": "autumn", "meshes": ["k_oak_fall", "k_fat_fall", "k_default_fall", "k_thin"], "density": 1.2, "spacing": 6, "footprint": 0.47,
+      "bands": ["grass", "meadow", "hill", "sand"], "height": [0.8, 9], "maxSlope": 28, "playableMargin": 3,
+      "scale": [4.5, 6.5], "tilt": 5, "tintJitter": 0.06, "clusters": { "frequency": 0.04, "threshold": -0.1, "softness": 0.3 } },
+    { "id": "stumps", "meshes": ["k_stump", "k_stump_round", "k_log"], "density": 0.4, "spacing": 8, "footprint": 0.35,
+      "bands": ["grass", "meadow", "hill"], "height": [1.0, 9], "maxSlope": 30, "playableMargin": 3,
+      "scale": [3.5, 5], "tintJitter": 0.05 },
+    { "id": "dry_bushes", "meshes": ["k_bush", "k_bush_large"], "density": 2, "spacing": 3, "footprint": 0.27,
+      "bands": ["grass", "meadow", "hill"], "height": [1.0, 9], "maxSlope": 30, "playableMargin": 1,
+      "scale": [3.0, 4.5], "tintJitter": 0.08, "clusters": { "frequency": 0.05, "threshold": 0.0, "softness": 0.3 } },
+    { "id": "golden_grass", "mesh": "grass_dry", "density": 260, "spacing": 0.6,
+      "bands": ["grass", "meadow", "hill", "sand"], "height": [0.6, 9], "maxSlope": 35, "avoidPlayable": false,
+      "playableDensity": 0.2, "playableScale": 0.5, "playableFade": 6, "scale": [0.8, 1.2], "tilt": 8, "tintJitter": 0.1,
+      "clusters": { "frequency": 0.03, "threshold": -0.3, "softness": 0.4 }, "cover": "#b88a46", "coverArea": 0.35 },
+    { "id": "yellow_beds", "meshes": ["k_flower_yellow_a", "k_flower_yellow_b"], "density": 25, "spacing": 0.9,
+      "bands": ["grass", "meadow"], "height": [1.0, 6], "maxSlope": 25, "playableMargin": 1,
+      "scale": [2.0, 2.6], "tilt": 6, "clusters": { "frequency": 0.05, "threshold": 0.5, "softness": 0.15 } },
+    { "id": "short_grass", "mesh": "grass_short", "density": 120, "spacing": 0.55,
+      "bands": ["grass", "meadow", "hill"], "height": [1.0, 9], "maxSlope": 35, "avoidPlayable": false,
+      "playableDensity": 1.0, "playableScale": 0.8, "scale": [0.8, 1.2], "tilt": 8, "tintJitter": 0.1 }
+  ]
+}

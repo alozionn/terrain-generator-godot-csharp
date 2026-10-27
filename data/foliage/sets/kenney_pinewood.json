@@ -1,0 +1,24 @@
+{
+  "version": 1,
+  "id": "kenney_pinewood",
+  // pinewood.json with Kenney Nature Kit pines and stones.
+  "climate": { "temperature": [0.0, 0.42], "moisture": [0.0, 1.0] },
+  "ground": { "bands": ["grass", "meadow", "hill", "rock"], "tint": "#d4dcc4", "patches": "dirt",
+              "patchAmount": 0.7, "patchFrequency": 0.06, "patchThreshold": 0.15 },
+  "species": [
+    { "id": "pines", "meshes": ["k_pine_round_a", "k_pine_round_b", "k_pine_round_c", "k_pine_tall_a", "k_pine_tall_b", "k_pine_a", "k_pine_b"],
+      "density": 9, "spacing": 3.5, "footprint": 0.33,
+      "bands": ["grass", "meadow", "hill", "rock"], "height": [1.5, 13], "maxSlope": 40, "playableMargin": 2,
+      "scale": [5, 7], "tilt": 2, "tintJitter": 0.05, "clusters": { "frequency": 0.03, "threshold": -0.3, "softness": 0.3 } },
+    { "id": "stones", "meshes": ["k_stone_a", "k_stone_b", "k_stone_tall_a"], "density": 2, "spacing": 3.5, "footprint": 0.8,
+      "height": [1.0, 16], "maxSlope": 45, "playableMargin": 1, "scale": [1.0, 2.0], "tilt": 15, "tintJitter": 0.06,
+      "ridge": [-1, 0.1], "alignToSlope": 0.6, "sink": [0.1, 0.3] },
+    { "id": "wisps", "meshes": ["k_grass_large", "k_grass"], "density": 20, "spacing": 1.2,
+      "bands": ["grass", "meadow", "hill", "rock"], "height": [1.0, 14], "maxSlope": 40, "avoidPlayable": false,
+      "playableDensity": 0.7, "playableScale": 0.7, "scale": [1.8, 2.6], "tilt": 8, "tintJitter": 0.06,
+      "clusters": { "frequency": 0.05, "threshold": -0.2, "softness": 0.4 }, "cover": "#8d9a58", "coverArea": 0.6 },
+    { "id": "short_grass", "mesh": "grass_short", "density": 90, "spacing": 0.55,
+      "bands": ["grass", "meadow", "hill"], "height": [1.0, 12], "maxSlope": 35, "avoidPlayable": false,
+      "playableDensity": 1.0, "playableScale": 0.8, "scale": [0.8, 1.2], "tilt": 8, "tintJitter": 0.1 }
+  ]
+}

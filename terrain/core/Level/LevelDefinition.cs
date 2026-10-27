@@ -187,10 +187,16 @@ public sealed class ErosionDefinition
 
 public enum FalloffKind { Island, None }
 
+public enum IslandShape { Circle, Square }
+
 public sealed class FalloffDefinition
 {
     public FalloffKind Kind { get; set; } = FalloffKind.Island;
-    /// <summary>Coast distance from the centre, as a fraction of the map size.</summary>
+    /// <summary>Outline of the island: a circle, or a square with rounded corners.</summary>
+    public IslandShape Shape { get; set; } = IslandShape.Circle;
+    /// <summary>Square only: corner radius, as a fraction of the map size.</summary>
+    public float Corner { get; set; } = 0.06f;
+    /// <summary>Coast distance from the centre (half the side for a square), as a fraction of the map size.</summary>
     public float Radius { get; set; } = 0.38f;
     /// <summary>Width of the land-to-sea slope, as a fraction of the map size.</summary>
     public float Edge { get; set; } = 0.08f;
@@ -238,6 +244,8 @@ public sealed class PaletteDefinition
     public MacroDefinition Macro { get; set; } = new();
     /// <summary>How eroded ground is painted from the erosion ridge map.</summary>
     public ErosionPaintDefinition Erosion { get; set; } = new();
+    /// <summary>Ground texture set (data/ground/{id}.json) the bands' "tex" ids refer to.</summary>
+    public string Textures { get; set; } = "textures";
 }
 
 /// <summary>
@@ -293,6 +301,12 @@ public sealed class TextureSetDefinition
 {
     public int Version { get; set; } = 1;
     public List<GroundTextureDefinition> Textures { get; set; } = new();
+    /// <summary>Mip bias when sampling: higher keeps the textures' colours but drops their fine detail (painterly).</summary>
+    public float MipBias { get; set; }
+    /// <summary>Normal map strength.</summary>
+    public float NormalStrength { get; set; } = 1f;
+    /// <summary>Height-blend softness between textures: smaller gives crisper edges.</summary>
+    public float BlendDepth { get; set; } = 0.2f;
 }
 
 public sealed class GroundTextureDefinition
@@ -306,4 +320,8 @@ public sealed class GroundTextureDefinition
     public float UvScale { get; set; } = 0.1f;
     /// <summary>Stand-in when there are no image files yet: noise between two colours.</summary>
     public string[] Procedural { get; set; } = System.Array.Empty<string>();
+    /// <summary>Rock layers per metre of height drawn on steep ground (0 = none).</summary>
+    public float Strata { get; set; }
+    /// <summary>How much each layer lightens or darkens.</summary>
+    public float StrataShade { get; set; } = 0.12f;
 }

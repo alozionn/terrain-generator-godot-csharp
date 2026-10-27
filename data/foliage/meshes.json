@@ -10,6 +10,13 @@
   // things that must read from the board camera (tall grass, flower beds, trees) keep a share far out.
   // Clumps ("procedural:grass" / "procedural:flowers") also drop single blades between bladeThin[0] and [1], down to
   // bladeMin, then swap to a light mesh with just those blades.
+  // flat-coloured kits: a mesh with "colors" takes these colours by material name (Kenney ships teal leaves, salmon
+  // bark and ice-blue stone; these match the island instead)
+  "colorSchemes": {
+    "kenney": { "leafsGreen": "#5b9a38", "leafsDark": "#3d7337", "leafsFall": "#d98b2b", "woodBark": "#7a5337",
+                "woodBarkDark": "#5c4231", "woodBirch": "#e6dccb", "woodInner": "#c9a06a", "stone": "#a8a49b",
+                "dirt": "#8a6a48", "grass": "#78ad45" }
+  },
   "meshes": [
     { "id": "tree_common_1", "scene": "res://assets/nature/CommonTree_1.gltf", "wind": 0.15, "stiffness": 0.9, "range": 450, "bakedShadow": true, "shadowDensity": 0.8 },
     { "id": "tree_common_2", "scene": "res://assets/nature/CommonTree_2.gltf", "wind": 0.15, "stiffness": 0.9, "range": 450, "bakedShadow": true, "shadowDensity": 0.8 },
@@ -72,6 +79,53 @@
     { "id": "flowers_violet", "scene": "procedural:flowers", "color": "#86ad48", "rootColor": "#3f5e22", "headColor": "#8f6fd8",
       "blades": 12, "bladeHeight": [0.2, 0.35], "bladeWidth": 0.035, "radius": 0.25, "heads": 0.6,
       "bladeThin": [12, 35], "bladeMin": 0.45, "thin": [30, 90], "thinMin": 0.25, "compensate": 0.7, "range": 120, "castShadows": false },
+
+    // Kenney Nature Kit (CC0), assets/kenney_nature/: flat-coloured low-poly, about 1/6 of real size (trees 1.2-1.9 m),
+    // so the kenney_* sets scale them up. Leaves are told from bark by material name (leafs*, wood*).
+    { "id": "k_oak", "scene": "res://assets/kenney_nature/tree_oak.glb", "colors": "kenney", "wind": 0.15, "stiffness": 0.9, "leafNormals": 0, "range": 450, "bakedShadow": true, "shadowDensity": 1.0 },
+    { "id": "k_default", "scene": "res://assets/kenney_nature/tree_default.glb", "colors": "kenney", "wind": 0.15, "stiffness": 0.9, "leafNormals": 0, "range": 450, "bakedShadow": true, "shadowDensity": 1.0 },
+    { "id": "k_detailed", "scene": "res://assets/kenney_nature/tree_detailed.glb", "colors": "kenney", "wind": 0.15, "stiffness": 0.9, "leafNormals": 0, "range": 450, "bakedShadow": true, "shadowDensity": 1.0 },
+    { "id": "k_fat", "scene": "res://assets/kenney_nature/tree_fat.glb", "colors": "kenney", "wind": 0.15, "stiffness": 0.9, "leafNormals": 0, "range": 450, "bakedShadow": true, "shadowDensity": 1.0 },
+    { "id": "k_plateau", "scene": "res://assets/kenney_nature/tree_plateau.glb", "colors": "kenney", "wind": 0.15, "stiffness": 0.9, "leafNormals": 0, "range": 450, "bakedShadow": true, "shadowDensity": 1.0 },
+    { "id": "k_thin", "scene": "res://assets/kenney_nature/tree_thin.glb", "colors": "kenney", "wind": 0.15, "stiffness": 0.9, "leafNormals": 0, "range": 450, "bakedShadow": true, "shadowDensity": 0.8 },
+    { "id": "k_oak_fall", "scene": "res://assets/kenney_nature/tree_oak_fall.glb", "colors": "kenney", "wind": 0.12, "stiffness": 0.9, "leafNormals": 0, "range": 450, "bakedShadow": true, "shadowDensity": 0.8 },
+    { "id": "k_fat_fall", "scene": "res://assets/kenney_nature/tree_fat_fall.glb", "colors": "kenney", "wind": 0.12, "stiffness": 0.9, "leafNormals": 0, "range": 450, "bakedShadow": true, "shadowDensity": 0.8 },
+    { "id": "k_default_fall", "scene": "res://assets/kenney_nature/tree_default_fall.glb", "colors": "kenney", "wind": 0.12, "stiffness": 0.9, "leafNormals": 0, "range": 450, "bakedShadow": true, "shadowDensity": 0.8 },
+    { "id": "k_pine_round_a", "scene": "res://assets/kenney_nature/tree_pineRoundA.glb", "colors": "kenney", "wind": 0.12, "stiffness": 0.9, "leafNormals": 0, "range": 450, "bakedShadow": true, "shadowDensity": 1.0 },
+    { "id": "k_pine_round_b", "scene": "res://assets/kenney_nature/tree_pineRoundB.glb", "colors": "kenney", "wind": 0.12, "stiffness": 0.9, "leafNormals": 0, "range": 450, "bakedShadow": true, "shadowDensity": 1.0 },
+    { "id": "k_pine_round_c", "scene": "res://assets/kenney_nature/tree_pineRoundC.glb", "colors": "kenney", "wind": 0.12, "stiffness": 0.9, "leafNormals": 0, "range": 450, "bakedShadow": true, "shadowDensity": 1.0 },
+    { "id": "k_pine_tall_a", "scene": "res://assets/kenney_nature/tree_pineTallA.glb", "colors": "kenney", "wind": 0.12, "stiffness": 0.9, "leafNormals": 0, "range": 450, "bakedShadow": true, "shadowDensity": 1.0 },
+    { "id": "k_pine_tall_b", "scene": "res://assets/kenney_nature/tree_pineTallB.glb", "colors": "kenney", "wind": 0.12, "stiffness": 0.9, "leafNormals": 0, "range": 450, "bakedShadow": true, "shadowDensity": 1.0 },
+    { "id": "k_pine_a", "scene": "res://assets/kenney_nature/tree_pineDefaultA.glb", "colors": "kenney", "wind": 0.12, "stiffness": 0.9, "leafNormals": 0, "range": 450, "bakedShadow": true, "shadowDensity": 1.0 },
+    { "id": "k_pine_b", "scene": "res://assets/kenney_nature/tree_pineDefaultB.glb", "colors": "kenney", "wind": 0.12, "stiffness": 0.9, "leafNormals": 0, "range": 450, "bakedShadow": true, "shadowDensity": 1.0 },
+    { "id": "k_stump", "scene": "res://assets/kenney_nature/stump_old.glb", "colors": "kenney", "range": 200 },
+    { "id": "k_stump_round", "scene": "res://assets/kenney_nature/stump_round.glb", "colors": "kenney", "range": 200 },
+    { "id": "k_log", "scene": "res://assets/kenney_nature/log.glb", "colors": "kenney", "range": 200 },
+    { "id": "k_stone_a", "scene": "res://assets/kenney_nature/stone_largeA.glb", "colors": "kenney", "range": 300 },
+    { "id": "k_stone_b", "scene": "res://assets/kenney_nature/stone_largeB.glb", "colors": "kenney", "range": 300 },
+    { "id": "k_stone_c", "scene": "res://assets/kenney_nature/stone_largeC.glb", "colors": "kenney", "range": 300 },
+    { "id": "k_stone_tall_a", "scene": "res://assets/kenney_nature/stone_tallA.glb", "colors": "kenney", "range": 300 },
+    { "id": "k_stone_tall_b", "scene": "res://assets/kenney_nature/stone_tallB.glb", "colors": "kenney", "range": 300 },
+    { "id": "k_mossy_a", "scene": "res://assets/kenney_nature/rock_largeA.glb", "colors": "kenney", "range": 300 },
+    { "id": "k_mossy_b", "scene": "res://assets/kenney_nature/rock_largeB.glb", "colors": "kenney", "range": 300 },
+    { "id": "k_pebble_a", "scene": "res://assets/kenney_nature/stone_smallA.glb", "colors": "kenney", "range": 70, "fade": true, "thin": [20, 60], "castShadows": false },
+    { "id": "k_pebble_b", "scene": "res://assets/kenney_nature/stone_smallB.glb", "colors": "kenney", "range": 70, "fade": true, "thin": [20, 60], "castShadows": false },
+    { "id": "k_pebble_c", "scene": "res://assets/kenney_nature/stone_smallC.glb", "colors": "kenney", "range": 70, "fade": true, "thin": [20, 60], "castShadows": false },
+    { "id": "k_bush", "scene": "res://assets/kenney_nature/plant_bush.glb", "colors": "kenney", "wind": 0.06, "range": 250, "bakedShadow": true, "shadowDensity": 1.4 },
+    { "id": "k_bush_large", "scene": "res://assets/kenney_nature/plant_bushLarge.glb", "colors": "kenney", "wind": 0.06, "range": 250, "bakedShadow": true, "shadowDensity": 1.4 },
+    { "id": "k_bush_detailed", "scene": "res://assets/kenney_nature/plant_bushDetailed.glb", "colors": "kenney", "wind": 0.06, "range": 250, "bakedShadow": true, "shadowDensity": 1.4 },
+    { "id": "k_grass", "scene": "res://assets/kenney_nature/grass.glb", "colors": "kenney", "wind": 0.1, "leafNormals": 0, "range": 110, "fade": true, "thin": [30, 90], "thinMin": 0.3, "compensate": 0.6, "castShadows": false },
+    { "id": "k_grass_large", "scene": "res://assets/kenney_nature/grass_large.glb", "colors": "kenney", "wind": 0.12, "leafNormals": 0, "range": 140, "fade": true, "thin": [40, 120], "thinMin": 0.35, "compensate": 0.6, "castShadows": false },
+    { "id": "k_grass_leafs", "scene": "res://assets/kenney_nature/grass_leafs.glb", "colors": "kenney", "wind": 0.05, "leafNormals": 0, "range": 60, "fade": true, "thin": [15, 45], "castShadows": false },
+    { "id": "k_grass_leafs_large", "scene": "res://assets/kenney_nature/grass_leafsLarge.glb", "colors": "kenney", "wind": 0.05, "leafNormals": 0, "range": 60, "fade": true, "thin": [15, 45], "castShadows": false },
+    { "id": "k_flower_yellow_a", "scene": "res://assets/kenney_nature/flower_yellowA.glb", "colors": "kenney", "wind": 0.06, "range": 90, "fade": true, "thin": [25, 70], "thinMin": 0.25, "compensate": 0.5, "castShadows": false },
+    { "id": "k_flower_yellow_b", "scene": "res://assets/kenney_nature/flower_yellowB.glb", "colors": "kenney", "wind": 0.06, "range": 90, "fade": true, "thin": [25, 70], "thinMin": 0.25, "compensate": 0.5, "castShadows": false },
+    { "id": "k_flower_purple_a", "scene": "res://assets/kenney_nature/flower_purpleA.glb", "colors": "kenney", "wind": 0.06, "range": 90, "fade": true, "thin": [25, 70], "thinMin": 0.25, "compensate": 0.5, "castShadows": false },
+    { "id": "k_flower_purple_b", "scene": "res://assets/kenney_nature/flower_purpleB.glb", "colors": "kenney", "wind": 0.06, "range": 90, "fade": true, "thin": [25, 70], "thinMin": 0.25, "compensate": 0.5, "castShadows": false },
+    { "id": "k_flower_red", "scene": "res://assets/kenney_nature/flower_redA.glb", "colors": "kenney", "wind": 0.06, "range": 90, "fade": true, "thin": [25, 70], "thinMin": 0.25, "compensate": 0.5, "castShadows": false },
+    { "id": "k_mushroom_red", "scene": "res://assets/kenney_nature/mushroom_red.glb", "colors": "kenney", "range": 45, "fade": true, "thin": [12, 35], "castShadows": false },
+    { "id": "k_mushroom_red_group", "scene": "res://assets/kenney_nature/mushroom_redGroup.glb", "colors": "kenney", "range": 45, "fade": true, "thin": [12, 35], "castShadows": false },
+    { "id": "k_mushroom_tan_group", "scene": "res://assets/kenney_nature/mushroom_tanGroup.glb", "colors": "kenney", "range": 45, "fade": true, "thin": [12, 35], "castShadows": false },
 
     { "id": "grass", "scene": "procedural:grass", "color": "#b4d966", "rootColor": "#7a9a38",
       "blades": 16, "bladeHeight": [0.22, 0.45], "bladeWidth": 0.05, "radius": 0.3,

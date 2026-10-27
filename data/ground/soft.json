@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  // textures.json, softened: the same photo textures sampled four mip levels down, so their colour variation stays but
+  // the photographic detail (twigs, single leaves, pebbles) goes, and a weaker normal map; a middle ground between
+  // the photo set and flat.json
+  "mipBias": 4,
+  "normalStrength": 0.35,
+  "textures": [
+    { "id": "grass",  "albedoHeight": "res://assets/textures/ground/ground037_alb_ht.png", "normalRoughness": "res://assets/textures/ground/ground037_nrm_rgh.png", "uvScale": 0.12 },
+    { "id": "rock",   "albedoHeight": "res://assets/textures/ground/rock023_alb_ht.png",   "normalRoughness": "res://assets/textures/ground/rock023_nrm_rgh.png",   "uvScale": 0.08 },
+    { "id": "sand",   "procedural": ["#d8c79b", "#bfa97a"], "uvScale": 0.15 },
+    { "id": "seabed", "procedural": ["#8a7d63", "#5f5745"], "uvScale": 0.1 },
+    // biome patches (ambientCG, CC0): bare earth, forest-floor leaf litter, dry pebbly soil
+    { "id": "dirt",   "albedoHeight": "res://assets/textures/ground/ground103_alb_ht.png", "normalRoughness": "res://assets/textures/ground/ground103_nrm_rgh.png", "uvScale": 0.15 },
+    { "id": "litter", "albedoHeight": "res://assets/textures/ground/leaves009_alb_ht.png", "normalRoughness": "res://assets/textures/ground/leaves009_nrm_rgh.png", "uvScale": 0.18 },
+    { "id": "dry",    "albedoHeight": "res://assets/textures/ground/ground109_alb_ht.png", "normalRoughness": "res://assets/textures/ground/ground109_nrm_rgh.png", "uvScale": 0.15 }
+  ]
+}

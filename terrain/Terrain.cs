@@ -30,6 +30,7 @@ public partial class Terrain : Node3D
     [Export] public WorldEnvironment Environment { get; set; }
 
     GroundTextures _textures;
+    readonly Dictionary<string, GroundTextures> _textureSets = new();
     Image _shadowImage;
     ImageTexture _shadowTexture;
     GroundRenderer _ground;
@@ -73,9 +74,12 @@ public partial class Terrain : Node3D
         var palette = Read<PaletteDefinition>($"{DataRoot}/palettes/{level.Palette}.json");
         if (layout == null || palette == null) return;
 
-        if (_textures == null)
+        string textureSet = string.IsNullOrEmpty(palette.Textures) ? "textures" : palette.Textures;
+        if (!_textureSets.TryGetValue(textureSet, out _textures))
+            _textureSets[textureSet] = _textures =
+                GroundTextures.Load(Read<TextureSetDefinition>($"{DataRoot}/ground/{textureSet}.json") ?? new TextureSetDefinition());
+        if (_ground == null)
         {
-            _textures = GroundTextures.Load(Read<TextureSetDefinition>($"{DataRoot}/ground/textures.json") ?? new TextureSetDefinition());
             _ground = new GroundRenderer(this);
             _foliage = new FoliageInstancer(this);
             _foliage.LoadMeshes(Read<FoliageMeshSetDefinition>($"{DataRoot}/foliage/meshes.json") ?? new FoliageMeshSetDefinition());

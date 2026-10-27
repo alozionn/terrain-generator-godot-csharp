@@ -119,6 +119,8 @@ public sealed class FoliageMeshSetDefinition
 {
     public int Version { get; set; } = 1;
     public List<FoliageMeshDefinition> Meshes { get; set; } = new();
+    /// <summary>Colour schemes by id: material name to "#rrggbb", for flat-coloured kits (a mesh picks one by "colors").</summary>
+    public Dictionary<string, Dictionary<string, string>> ColorSchemes { get; set; } = new();
 }
 
 public sealed class FoliageMeshDefinition
@@ -189,4 +191,6 @@ public sealed class FoliageMeshDefinition
     public bool ReceiveBake { get; set; } = true;
     /// <summary>Authored scenes: ["#root", "#tip"] recolours leaf and grass surfaces by height, keeping only the texture's light and dark.</summary>
     public string[] Recolor { get; set; } = System.Array.Empty<string>();
+    /// <summary>Authored scenes: a colour scheme from the mesh set; surfaces whose material it names get that flat colour.</summary>
+    public string Colors { get; set; } = "";
 }

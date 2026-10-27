@@ -3,7 +3,7 @@
   "id": "harbour_village",
   "seed": 1234,
   "layout": "twin_peaks",
-  "palette": "meadow",
+  "palette": "meadow_flat",
   "size": 200,
   "sampleSpacing": 1.0,
   "cellSize": 2.0,
@@ -15,7 +15,8 @@
       "minBuildable": 0.2 }
   ],
   // regional sets (with a climate) each take the Voronoi regions whose climate suits them; "ground" grows everywhere
-  "foliage": ["ground", "meadow", "forest", "pinewood", "heath"],
+  // Kenney Nature Kit models (kenney_* sets) on the flat-colour ground
+  "foliage": ["kenney_ground", "kenney_meadow", "kenney_forest", "kenney_pinewood", "kenney_heath"],
   // warmer to the south-east, cooler up the mountains in the north, wetter along the coast
   "climate": { "temperature": 0.56, "gradient": [0.3, 0.2], "lapse": 0.035, "moisture": 0.42, "coast": 0.2, "coastReach": 25,
                "noise": 0.12, "moistureNoise": 0.3, "frequency": 0.014 },

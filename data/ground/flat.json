@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  // flat-colour ground in the style of low-poly kits (Kenney): the same ids as textures.json, but near-solid colours
+  // with only a faint noise, so the ground reads as painted areas instead of photo-scanned detail; cliffs get flat
+  // stone layers (strata) instead, like the kit's faceted rocks
+  "blendDepth": 0.06,
+  "textures": [
+    { "id": "grass",  "procedural": ["#8cb852", "#83ae4c"], "uvScale": 0.05 },
+    { "id": "rock",   "procedural": ["#8f8a80", "#7f7a71"], "uvScale": 0.05, "strata": 0.8, "strataShade": 0.2 },
+    { "id": "sand",   "procedural": ["#ecdba6", "#e2d098"], "uvScale": 0.05 },
+    { "id": "seabed", "procedural": ["#8a7d63", "#7d7058"], "uvScale": 0.05 },
+    { "id": "dirt",   "procedural": ["#b08a5a", "#a68052"], "uvScale": 0.05 },
+    { "id": "litter", "procedural": ["#93783f", "#8a6f3a"], "uvScale": 0.05 },
+    { "id": "scree",  "procedural": ["#857c6e", "#766e62"], "uvScale": 0.08, "strata": 0.8, "strataShade": 0.12 },
+    { "id": "dry",    "procedural": ["#d4b672", "#caac68"], "uvScale": 0.05 }
+  ]
+}

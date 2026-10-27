@@ -9,7 +9,7 @@ namespace Terrain.Demo;
 /// </summary>
 public partial class DemoRoot : Node3D
 {
-    static readonly string[] Palettes = { "meadow", "dusk_bloom" };
+    static readonly string[] Palettes = { "meadow", "meadow_soft", "meadow_flat", "dusk_bloom" };
     static readonly string[] Lightings = { "default", "golden", "pastel" };
 
     // starting view: orbit angles in degrees, distance as a fraction of the map size
@@ -57,6 +57,9 @@ public partial class DemoRoot : Node3D
         // --level path loads another level (e.g. a perf variant)
         int lv = Array.IndexOf(args, "--level");
         if (lv >= 0 && lv + 1 < args.Length) _terrain.LoadLevel(args[lv + 1]);
+        // --palette id switches the palette
+        int pa = Array.IndexOf(args, "--palette");
+        if (pa >= 0 && pa + 1 < args.Length) _terrain.SetPalette(args[pa + 1]);
         // --view x,z,yaw,pitch,distance frames a shot; --nogrid hides the cell grid
         int v = Array.IndexOf(args, "--view");
         if (v >= 0 && v + 1 < args.Length)

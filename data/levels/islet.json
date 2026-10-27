@@ -3,7 +3,7 @@
   "id": "islet",
   "seed": 7,
   "layout": "islet",
-  "palette": "meadow",
+  "palette": "meadow_flat",
   "size": 160,
   "sampleSpacing": 0.5,
   "cellSize": 2.0,
@@ -11,7 +11,7 @@
     // a raised yard for the house in the middle of the island
     { "id": "yard", "origin": [36, 35], "cells": [9, 9], "height": [2.3, 2.6], "corner": 3, "ragged": 2, "blend": 5 }
   ],
-  "foliage": ["ground", "meadow", "forest"],
+  "foliage": ["kenney_ground", "kenney_meadow", "kenney_forest"],
   "climate": { "temperature": 0.55, "gradient": [0, 0], "lapse": 0.03, "moisture": 0.5, "coast": 0.15, "coastReach": 10,
                "noise": 0.1, "moistureNoise": 0.3, "frequency": 0.03 },
   "regions": { "size": 18, "warp": 8, "blend": 5 },

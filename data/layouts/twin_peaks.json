@@ -1,12 +1,16 @@
 {
   "version": 1,
   "id": "twin_peaks",
-  // island with two mountains to the north and a gentle hill west; the port sits on the south-east coast
-  "falloff": { "kind": "island", "radius": 0.38, "edge": 0.1, "coastNoise": 0.06, "landHeight": 1.2, "seaDepth": -6 },
+  // square island with a mountain range along the north (two peaks plus shoulders into the corners) and a gentle hill
+  // west; the port sits on the south-east coast
+  "falloff": { "kind": "island", "shape": "square", "corner": 0.07, "radius": 0.38, "edge": 0.1, "coastNoise": 0.05,
+               "landHeight": 1.2, "seaDepth": -6 },
   "stamps": [
-    { "type": "mountain", "at": [0.74, 0.22], "radius": 34, "height": 16 },
-    { "type": "mountain", "at": [0.56, 0.16], "radius": 24, "height": 10 },
-    { "type": "hill",     "at": [0.22, 0.48], "radius": 22, "height": 3 }
+    { "type": "mountain", "at": [0.72, 0.2],  "radius": 44, "height": 18 },
+    { "type": "mountain", "at": [0.5, 0.16],  "radius": 32, "height": 11 },
+    { "type": "mountain", "at": [0.86, 0.16], "radius": 28, "height": 12 },
+    { "type": "mountain", "at": [0.28, 0.15], "radius": 26, "height": 8 },
+    { "type": "hill",     "at": [0.2, 0.5],   "radius": 24, "height": 3 }
   ],
   "detail": { "amplitude": 1.4, "frequency": 0.025, "octaves": 4, "warp": 14 },
   // gullies down the mountain and hill flanks (runevision-style erosion filter)
